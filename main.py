@@ -10,6 +10,7 @@ from mapGenerator import prevPoints
 target = 'None'
 # TODO
 
+
 class ObjActor:
     def __init__(self, row, column, name, sprite, classType):
         self.row = row
@@ -94,8 +95,8 @@ class Creatures(ObjActor):
             elif (self.row, self.column-1) == (object.row, object.column):
                 target = object
                 break
-            else:
-                return
+        if target == "None":
+            return
         damage = strength
         # FOR NOW: damage = strength
         dodge = target.dodge(target.speed)
@@ -139,8 +140,49 @@ class Creatures(ObjActor):
             r, g, b = colorsys.hsv_to_rgb(h, s, v)
             color = [int(255*r), int(255*g), int(255*b)]
             pygame.draw.line(mainDisplay, color, lineStart, lineEnd, 10)
-        else:
-            k=0
+
+
+def button(text, font, size, xpos, ypos, width, height, colorL, colorD, action=None):
+    # colorL is the idle button color, colorD is when it is hovered over
+    # action refers to the function that the button calls
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    # Checks to see if the cursor is in the button's confines
+    if xpos + width > mouse[0] > xpos and ypos + height > mouse[1] > ypos:
+        pygame.draw.rect(mainDisplay, colorD, (xpos, ypos, width, height))
+
+        if click[0] == 1 and action is not None:
+            action()
+    else:
+        pygame.draw.rect(mainDisplay, colorL, (xpos, ypos, width, height))
+
+    myFont = pygame.font.SysFont(font, size)
+    textSurf = myFont.render(text, False, (0, 0, 0))
+    textRect = textSurf.get_rect()
+    textRect = textRect.move((xpos + ((width-textRect.width)/2)), (ypos + (height-textRect.height)/2))
+    # textRect = textRect.move((xpos + ((width/2)-textRect.width)), (ypos - textRect.height + (height/2)))
+    mainDisplay.blit(textSurf, textRect)
+
+
+def mainMenu():
+    mainMenu = True
+    while mainMenu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                mainMenu = False
+        # Takes the desired background image and stretches it to the screen size
+        backgroundImage = pygame.transform.scale(constants.menuBackground, constants.displaySize)
+        # Displays background image
+        mainDisplay.blit(backgroundImage, (0, 0))
+        # Creates four buttons, all with different text, functions, and y positions
+        button("Start", constants.menuButtonFont, constants.menuButtonFontSize, (constants.displaySize[0]-constants.menuButtonWidth)/2, 175, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, gameMain)
+        button("Resume", constants.menuButtonFont, constants.menuButtonFontSize, (constants.displaySize[0]-constants.menuButtonWidth)/2, 250, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
+        button("Options", constants.menuButtonFont, constants.menuButtonFontSize, (constants.displaySize[0]-constants.menuButtonWidth)/2, 325, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
+        button("About", constants.menuButtonFont, constants.menuButtonFontSize, (constants.displaySize[0]-constants.menuButtonWidth)/2, 400, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
+        # Updates the display
+        pygame.display.flip()
+    pygame.quit()
+    exit()
 
 
 def initMap(gameMap):
@@ -171,7 +213,6 @@ def drawGame():
 def gameMain():
     gameQuit = False
     while not gameQuit:
-        playerAction = "no-action"
         playerAction = handleKeys()
         if playerAction == "quit":
             gameQuit = True
@@ -210,10 +251,9 @@ def gameInitialize():
     global mainDisplay, gameMap, player, gameObjects
     pygame.init()
     mainDisplay = pygame.display.set_mode((constants.mapColumns * constants.cellWidth, constants.mapRows * constants.cellHeight))
-    results = mapGenerator.main() # returns map and mainStartRow (initial path start row)
-    gameMap = results[0] # saves map to gameMap
+    gameMap, mainStartRow = mapGenerator.main() # returns map and mainStartRow (initial path start row)
     gameObjects = []
-    player = Creatures(results[1], 0, "Wizard", constants.wizard, 'player', 3, 7, 5, 14)
+    player = Creatures(mainStartRow, 0, "Wizard", constants.wizard, 'player', 3, 7, 5, 14)
     gameObjects.append(player)
     # starts the player at (mainStartRow, 0)
     # TODO: refactor spawning
@@ -232,8 +272,8 @@ def gameInitialize():
             adjacent = False
             # TODO spawn other enemies
             # figure out leveling sometime (enemies depend on level)
+    mainMenu()
 
 
 if __name__ == '__main__':
     gameInitialize()
-    gameMain()

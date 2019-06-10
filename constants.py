@@ -31,3 +31,14 @@ darkWarrior = pygame.image.load('F:/carter/Pictures/GameAssets/darkwarriorBox.pn
 
 # Colors
 defaultColor = (100, 100, 100)
+
+
+# Main Menu
+displaySize = (mapColumns * cellWidth, mapRows * cellHeight)
+menuBackground = pygame.image.load('F:/carter/Pictures/GameAssets/menuBackground.jpg')
+menuButtonWidth = 150
+menuButtonHeight = 50
+menuButtonColorLight = (214, 237, 255)
+menuButtonColorDark = (179, 223, 255)
+menuButtonFont = "Calibri"
+menuButtonFontSize = 30
