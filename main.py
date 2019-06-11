@@ -156,7 +156,7 @@ def fadeIn(color=(211, 211, 211)):
 
 def displayText(text, font, fontSize, xpos, ypos, textColor, maxWidth, aa=False, bkg=None):
     font = pygame.font.SysFont(font, fontSize)
-    rect = pygame.Rect(xpos, ypos, maxWidth, constants.displaySize[1]/3)
+    rect = pygame.Rect(xpos, ypos, maxWidth, constants.displaySize[1])
     y = rect.top
     lineSpacing = -2
     fontHeight = font.size("Tg")[1]
@@ -214,7 +214,7 @@ def playerButton(playerName, image, xpos, ypos, width, height, text, maxWidth):
 def chooseCharacter():
     # TODO: Make screen based in percentages so it works with all screens
     global playerSelection
-    time.sleep(.1)
+    time.sleep(.2)
     chooseCharacterOpen = True
     playerSelection = "None"
     while chooseCharacterOpen:
@@ -276,6 +276,23 @@ def button(text, font, textSize, textColor, xpos, ypos, width, height, colorL, c
     mainDisplay.blit(textSurf, textRect)
 
 
+def about():
+    # About refers to about page being open
+    about = True
+    while about:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                about = False
+        #         Fills the screen a calm blue color
+        mainDisplay.fill((188, 212, 222))
+        displayText(constants.aboutText, "Calibri", 25, constants.displaySize[0]*.1, constants.displaySize[1]*.2, (255, 255, 255), constants.displaySize[0]*.8)
+        displayText("About the Dev Team", "Calibri-bold", 60, (constants.displaySize[0] - getTextDimension("width", "About the Dev Team", "Calibri-bold", 60))/2, constants.displaySize[1]*.05, (255, 255, 255), constants.displaySize[0])
+        button("Home", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, constants.displaySize[1]*.85, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
+        pygame.display.flip()
+    pygame.quit()
+    exit()
+
+
 def mainMenu():
     mainMenu = True
     while mainMenu:
@@ -290,7 +307,9 @@ def mainMenu():
         button("Start", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 175, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, chooseCharacter)
         button("Resume", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 250, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
         button("Options", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 325, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
-        button("About", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 400, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
+        button("About", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 400, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, about)
+        # Creates title
+        displayText("Going on an Adventure", "Garamond", 70, (constants.displaySize[0] - getTextDimension("width", "Going on an Adventure", constants.menuButtonFont, 70))/2, constants.displaySize[1]*.10, (255, 255, 255), constants.displaySize[0])
         # Updates the display
         pygame.display.flip()
     pygame.quit()

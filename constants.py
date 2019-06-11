@@ -1,5 +1,7 @@
 import pygame
 
+pygame.init()
+
 gameHeight = 600
 gameWidth = 800
 cellWidth = 32
@@ -43,6 +45,13 @@ menuButtonColorLight = (214, 237, 255)
 menuButtonColorDark = (179, 223, 255)
 menuButtonFont = "Calibri"
 menuButtonFontSize = 30
+
+# About Page
+aboutText = "This project was originally going to be a small game for our AP CSP class. However, our ambition grew and the project followed" \
+            "The two developers working on this project are Carter and Jake. Carter headed most of the development while Jake focused on " \
+            "miscellaneous tasks. Both were huge helps. They collaborate in and out of school which allowed the game to reach the full potential." \
+            "While the game does not include any original artwork (the timeframe did not allow anything), the pieces were selected with care and" \
+            "crafted a quaint universe. Select a character, fight enemies, level up, and work towards the bosses: go on an adventure."
 
 # Character Selection Menu
 characterImageSize = (150, 150)

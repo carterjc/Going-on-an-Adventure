@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="987a3c8d-eebb-43a3-aa87-ea32efb93008" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -24,10 +26,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="478">
-              <caret line="210" column="137" selection-start-line="210" selection-start-column="137" selection-end-line="210" selection-end-column="137" />
+            <state relative-caret-position="393">
+              <caret line="288" column="156" selection-start-line="288" selection-start-column="156" selection-end-line="288" selection-end-column="156" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
+                <marker date="1560218656398" expanded="true" signature="6720:7101" ph="..." />
               </folding>
             </state>
           </provider>
@@ -36,8 +39,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/constants.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="833">
-              <caret line="61" column="28" selection-start-line="61" selection-start-column="28" selection-end-line="61" selection-end-column="28" />
+            <state relative-caret-position="901">
+              <caret line="53" column="133" selection-start-line="53" selection-start-column="133" selection-end-line="53" selection-end-column="133" />
             </state>
           </provider>
         </entry>
@@ -57,6 +60,7 @@
       <find>createHea</find>
       <find>pygame.quit()</find>
       <find>prevPoints</find>
+      <find>john</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -284,17 +288,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/constants.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="833">
-          <caret line="61" column="28" selection-start-line="61" selection-start-column="28" selection-end-line="61" selection-end-column="28" />
+        <state relative-caret-position="901">
+          <caret line="53" column="133" selection-start-line="53" selection-start-column="133" selection-end-line="53" selection-end-column="133" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="478">
-          <caret line="210" column="137" selection-start-line="210" selection-start-column="137" selection-end-line="210" selection-end-column="137" />
+        <state relative-caret-position="393">
+          <caret line="288" column="156" selection-start-line="288" selection-start-column="156" selection-end-line="288" selection-end-column="156" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
+            <marker date="1560218656398" expanded="true" signature="6720:7101" ph="..." />
           </folding>
         </state>
       </provider>
