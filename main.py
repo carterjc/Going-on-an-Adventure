@@ -2,6 +2,7 @@ import pygame
 import random
 import colorsys
 import textwrap
+import time
 
 import constants
 import mapGenerator
@@ -143,42 +144,15 @@ class Creatures(ObjActor):
             pygame.draw.line(mainDisplay, color, lineStart, lineEnd, 10)
 
 
-# def displayText(text, fontSize, xpos, ypos, textColor, maxWidth):
-#     # Splits text into words
-#     font = constants.menuButtonFont
-#     font = pygame.font.SysFont(font, fontSize)
-#     words = text.split()
-#     # construct lines out of the words
-#     lines = []
-#     while len(words) > 0:
-#         # Get the max amount of words for the maxWidth
-#         line_words = []
-#         while len(words) > 0:
-#             line_words.append(words.pop(0))
-#             fontWidth, fontHeight = font.size(''.join(line_words + words[:1]))
-#             if fontWidth > maxWidth:
-#                 break
-#         # add a line consisting of said words
-#         line = ''.join(line_words)
-#         lines.append(line)
-#     # Now render the text split into lines
-#     y_offset = 0
-#     for line in lines:
-#         fontWidth, fontHeight = font.size(line)
-#
-#         # (tx, ty) is the top-left of the font surface
-#         tx = xpos - fontWidth /2
-#         ty = ypos + y_offset
-#
-#         font_surface = font.render(line, True, textColor)
-#         mainDisplay.blit(font_surface, (tx, ty))
-#
-#         y_offset += fontHeight
-#     # myfont = pygame.font.SysFont(font, fontSize)
-#     # display = myfont.render(text, True, textColor)
-#     # textRect = display.get_rect()
-#     # textRect = textRect.move(xpos, ypos)
-#     # mainDisplay.blit(display, textRect)
+def fadeIn(color=(211, 211, 211)):
+    fadeSurface = pygame.Surface((constants.displaySize[0], constants.displaySize[1]))
+    for alpha in range(0, 256):
+        fadeSurface.set_alpha(alpha)
+        pygame.draw.rect(mainDisplay, color, fadeSurface.get_rect())
+        mainDisplay.blit(fadeSurface, (0, 0))
+        pygame.display.flip()
+        time.sleep(.001)
+
 
 def displayText(text, font, fontSize, xpos, ypos, textColor, maxWidth, aa=False, bkg=None):
     font = pygame.font.SysFont(font, fontSize)
@@ -204,6 +178,19 @@ def displayText(text, font, fontSize, xpos, ypos, textColor, maxWidth, aa=False,
         text = text[i:]
 
 
+def getTextDimension(valueFound, text, font, fontSize):
+    surface = pygame.font.SysFont(font, fontSize)
+    image = surface.render(text, True, (0, 0, 0))
+    rect = image.get_rect()
+    # If the text height is requested, return it
+    if valueFound == "height":
+        return rect.height
+    elif valueFound == "width":
+        return rect.width
+    else:
+        return "None"
+
+
 def playerButton(playerName, image, xpos, ypos, width, height, text, maxWidth):
     global playerSelection
     # This function provides the code for the buttons and their text for the select character page
@@ -221,12 +208,13 @@ def playerButton(playerName, image, xpos, ypos, width, height, text, maxWidth):
     else:
         mainDisplay.blit(image, (xpos, ypos))
     #     TODO: make ypos the rect - text.height /2 so it is even
-    displayText(text, constants.menuButtonFont, 20, xpos + (constants.characterImageSize[0] + (constants.characterImageSize[0]/15)), ypos + (constants.characterImageSize[1]/5), (0, 0, 0), maxWidth)
+    displayText(text, constants.menuButtonFont, 20, xpos + (constants.characterImageSize[0] + (constants.characterImageSize[0]/15)), ypos, (0, 0, 0), maxWidth)
 
 
 def chooseCharacter():
     # TODO: Make screen based in percentages so it works with all screens
     global playerSelection
+    time.sleep(.1)
     chooseCharacterOpen = True
     playerSelection = "None"
     while chooseCharacterOpen:
@@ -244,6 +232,8 @@ def chooseCharacter():
             player = pygame.transform.scale(player, constants.characterImageSize)
             playerOptionsFinal.append(player)
         # Creates 4 image buttons that check for mouse hovering and clicks
+        # Creates a centered title
+        displayText("Choose Your Character!", constants.menuButtonFont, 35, (constants.displaySize[0] - getTextDimension("width", "Choose Your Character!", constants.menuButtonFont, 35))/2, constants.displaySize[1]*.05, (0, 0, 0), constants.displaySize[0]/2+100)
         playerButton("Wizard", playerOptionsFinal[0], 0, 75, constants.characterImageSize[0], constants.characterImageSize[1], constants.wizard.introText, (int(constants.displaySize[1]/2.5)))
         playerButton("Warrior", playerOptionsFinal[1], 0, 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.warrior.introText, (int(constants.displaySize[1]/2.5)))
         playerButton("Assassin", playerOptionsFinal[2], (constants.displaySize[1]/2) + constants.characterImageSize[0], 75, constants.characterImageSize[0], constants.characterImageSize[1], constants.assassin.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
@@ -385,6 +375,7 @@ def selectPlayer(mainStartRow):
 
 
 def gameInitialize():
+    fadeIn()
     global mainDisplay, gameMap, player, gameObjects
     gameMap, mainStartRow = mapGenerator.main() # returns map and mainStartRow (initial path start row)
     gameObjects = []
