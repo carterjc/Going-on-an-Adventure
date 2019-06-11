@@ -111,23 +111,25 @@ def addPaths():
 def pathBranch():
     k = 0
 
+
 def largerPath():
     k = 0
+
 
 def main():
     refreshMap(constants.mapRows, constants.mapColumns)
     mainStartRow = random.randint(5, len(myMap)-5)
     createPath(mainStartRow, 0, 'null', len(myMap[0])-1, 'first_path') # starting now is picked at random
     if mainStartRow < len(myMap)/2:
-        newStartRow = mainStartRow + ((len(myMap)/2)-(random.randint(0, mainStartRow+1)))
+        newStartRow = int(mainStartRow + ((len(myMap)/2)-(random.randint(0, mainStartRow+1))))
     else:
-        newStartRow = mainStartRow - ((len(myMap)/2)-(random.randint(0, mainStartRow+1)))
+        newStartRow = int(mainStartRow - ((len(myMap)/2)-(random.randint(0, mainStartRow+1))))
     createPath(newStartRow, 0, 'null', len(myMap[0])-1, 'another_path')
     # end Row is random for the first path, so the placeholder is 'null'
     # while current column is less than the max column
     addPaths()
     return myMap, mainStartRow
 
-main()
-for i in range(len(myMap)):
-    print(myMap[i])
+# main()
+# for i in range(len(myMap)):
+#     print(myMap[i])

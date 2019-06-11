@@ -1,11 +1,10 @@
 import pygame
 import random
 import colorsys
+import textwrap
 
 import constants
 import mapGenerator
-from mapGenerator import prevPoints
-
 
 target = 'None'
 pygame.init()
@@ -144,7 +143,68 @@ class Creatures(ObjActor):
             pygame.draw.line(mainDisplay, color, lineStart, lineEnd, 10)
 
 
-def playerButton(playerName, image, xpos, ypos, width, height):
+# def displayText(text, fontSize, xpos, ypos, textColor, maxWidth):
+#     # Splits text into words
+#     font = constants.menuButtonFont
+#     font = pygame.font.SysFont(font, fontSize)
+#     words = text.split()
+#     # construct lines out of the words
+#     lines = []
+#     while len(words) > 0:
+#         # Get the max amount of words for the maxWidth
+#         line_words = []
+#         while len(words) > 0:
+#             line_words.append(words.pop(0))
+#             fontWidth, fontHeight = font.size(''.join(line_words + words[:1]))
+#             if fontWidth > maxWidth:
+#                 break
+#         # add a line consisting of said words
+#         line = ''.join(line_words)
+#         lines.append(line)
+#     # Now render the text split into lines
+#     y_offset = 0
+#     for line in lines:
+#         fontWidth, fontHeight = font.size(line)
+#
+#         # (tx, ty) is the top-left of the font surface
+#         tx = xpos - fontWidth /2
+#         ty = ypos + y_offset
+#
+#         font_surface = font.render(line, True, textColor)
+#         mainDisplay.blit(font_surface, (tx, ty))
+#
+#         y_offset += fontHeight
+#     # myfont = pygame.font.SysFont(font, fontSize)
+#     # display = myfont.render(text, True, textColor)
+#     # textRect = display.get_rect()
+#     # textRect = textRect.move(xpos, ypos)
+#     # mainDisplay.blit(display, textRect)
+
+def displayText(text, font, fontSize, xpos, ypos, textColor, maxWidth, aa=False, bkg=None):
+    font = pygame.font.SysFont(font, fontSize)
+    rect = pygame.Rect(xpos, ypos, maxWidth, constants.displaySize[1]/3)
+    y = rect.top
+    lineSpacing = -2
+    fontHeight = font.size("Tg")[1]
+    while text:
+        i = 1
+        if y + fontHeight > rect.bottom:  # determine if the row of text will be outside our area
+            break
+        while font.size(text[:i])[0] < rect.width and i < len(text):  # determine maximum width of line
+            i += 1
+        if i < len(text):  # if we've wrapped the text, then adjust the wrap to the last word
+            i = text.rfind(" ", 0, i) + 1
+        if bkg:  # adding background color to the text (optional)
+            image = font.render(text[:i], 1, textColor, bkg)
+            image.set_colorkey(bkg)
+        else:  # render if bkg is None
+            image = font.render(text[:i], aa, textColor)
+        mainDisplay.blit(image, (rect.left, y))
+        y += fontHeight + lineSpacing
+        text = text[i:]
+
+
+def playerButton(playerName, image, xpos, ypos, width, height, text, maxWidth):
     global playerSelection
     # This function provides the code for the buttons and their text for the select character page
     mouse = pygame.mouse.get_pos()
@@ -157,45 +217,37 @@ def playerButton(playerName, image, xpos, ypos, width, height):
         mainDisplay.blit(rect, (xpos, ypos))
 
         if click[0] == 1:
-            # confirmOpen = True
-            # Updates the playerSelection, if the user goes back, selection is reset to None in chooseCharacter
             playerSelection = playerName
-            # while confirmOpen:
-            #     for event in pygame.event.get():
-            #         if event.type == pygame.QUIT:
-            #             pygame.quit()
-            #             exit()
-            #         confirmX, confirmY = (constants.gameWidth-300)/2, (constants.gameHeight-200)/2
-            #         pygame.draw.rect(mainDisplay, (255, 255, 255), (confirmX, confirmY, 300, 100))
-            #         button("Confirm", constants.menuButtonFont, 15, (255, 255, 255), confirmX + 25, confirmY + 25, 100, 50, (0,0,0), (0,0,0), gameInitialize)
-            #         button("Take Me Back", constants.menuButtonFont, 15, (255, 255, 255), confirmX + 25 + 150, confirmY + 25, 100, 50, (0,0,0), (0,0,0), chooseCharacter)
-            #         pygame.display.flip()
     else:
         mainDisplay.blit(image, (xpos, ypos))
+    #     TODO: make ypos the rect - text.height /2 so it is even
+    displayText(text, constants.menuButtonFont, 20, xpos + (constants.characterImageSize[0] + (constants.characterImageSize[0]/15)), ypos + (constants.characterImageSize[1]/5), (0, 0, 0), maxWidth)
 
 
 def chooseCharacter():
+    # TODO: Make screen based in percentages so it works with all screens
     global playerSelection
-    chooseCharacter = True
+    chooseCharacterOpen = True
     playerSelection = "None"
-    while chooseCharacter:
+    while chooseCharacterOpen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
         mainDisplay.fill(constants.defaultColor)
         # Inits a list of possible player images
-        playerOptions = [constants.wizardRaw, constants.archerRaw]
+        playerOptions = [constants.wizardRaw, constants.warriorRaw, constants.assassinRaw, constants.archerRaw]
         # Final list includes images that have been reformatted
         playerOptionsFinal = []
         for player in playerOptions:
             # for each player image, transform the size to the predetermined size
             player = pygame.transform.scale(player, constants.characterImageSize)
             playerOptionsFinal.append(player)
-        # Creates 2 image buttons that check for mouse hovering and clicks
-        playerButton("Wizard", playerOptionsFinal[0], 0, 75, constants.characterImageSize[0], constants.characterImageSize[1])
-        playerButton("Archer", playerOptionsFinal[1], 0, 275, constants.characterImageSize[0], constants.characterImageSize[1])
-        # Runs loop if player was selected
+        # Creates 4 image buttons that check for mouse hovering and clicks
+        playerButton("Wizard", playerOptionsFinal[0], 0, 75, constants.characterImageSize[0], constants.characterImageSize[1], constants.wizard.introText, (int(constants.displaySize[1]/2.5)))
+        playerButton("Warrior", playerOptionsFinal[1], 0, 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.warrior.introText, (int(constants.displaySize[1]/2.5)))
+        playerButton("Assassin", playerOptionsFinal[2], (constants.displaySize[1]/2) + constants.characterImageSize[0], 75, constants.characterImageSize[0], constants.characterImageSize[1], constants.assassin.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
+        playerButton("Archer", playerOptionsFinal[3], (constants.displaySize[1]/2) + constants.characterImageSize[0], 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.archer.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
         if playerSelection != "None":
             confirmOpen = True
             while confirmOpen:
@@ -205,8 +257,8 @@ def chooseCharacter():
                         exit()
                     confirmX, confirmY = (constants.gameWidth - 300) / 2, (constants.gameHeight - 200) / 2
                     pygame.draw.rect(mainDisplay, (255, 255, 255), (confirmX, confirmY, 300, 100))
-                    button("Confirm", constants.menuButtonFont, 15, (255, 255, 255), confirmX + 25, confirmY + 25, 100, 50,(0, 0, 0), (0, 0, 0), gameInitialize)
-                    button("Take Me Back", constants.menuButtonFont, 15, (255, 255, 255), confirmX + 25 + 150, confirmY + 25, 100, 50, (0, 0, 0), (0, 0, 0), chooseCharacter)
+                    button("Confirm", constants.menuButtonFont, 15, (255, 255, 255), confirmX + 25, confirmY + 25, 100, 50, (0, 0, 0), (53, 54, 53), gameInitialize)
+                    button("Take Me Back", constants.menuButtonFont, 15, (255, 255, 255), confirmX + 25 + 150, confirmY + 25, 100, 50, (0, 0, 0), (53, 54, 53), chooseCharacter)
                     pygame.display.flip()
         pygame.display.flip()
         if playerSelection != "None":
@@ -222,7 +274,6 @@ def button(text, font, textSize, textColor, xpos, ypos, width, height, colorL, c
     # Checks to see if the cursor is in the button's confines
     if xpos + width > mouse[0] > xpos and ypos + height > mouse[1] > ypos:
         pygame.draw.rect(mainDisplay, colorD, (xpos, ypos, width, height))
-
         if click[0] == 1 and action is not None:
             action()
     else:
@@ -260,9 +311,9 @@ def initMap(gameMap):
     for row in range(0, constants.mapRows):
         for column in range(0, constants.mapColumns):
             if gameMap[row][column] == 1:  # checks if there is a path
-                mainDisplay.blit(constants.path, (column * constants.cellWidth, row * constants.cellHeight))
+                mainDisplay.blit(constants.pathBox, (column * constants.cellWidth, row * constants.cellHeight))
             else:
-                mainDisplay.blit(constants.forest, (column * constants.cellWidth, row * constants.cellHeight))
+                mainDisplay.blit(constants.forestBox, (column * constants.cellWidth, row * constants.cellHeight))
 
 
 def drawGame():
@@ -321,16 +372,16 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, "Wizard", constants.wizard, 'player', 3, 7, 5, 14)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
-        return Creatures(mainStartRow, 0, "Warrior", constants.warrior, 'player', 3, 7, 5, 14)
+        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health)
     elif playerSelection == "Assassin":
         # Generates assassin as player if that is selected
-        return Creatures(mainStartRow, 0, "Assassin", constants.assassin, 'player', 3, 7, 5, 14)
+        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health)
     elif playerSelection == "Archer":
         # Generates archer as player if that is selected
-        return Creatures(mainStartRow, 0, "Archer", constants.archer, 'player', 3, 7, 5, 14)
+        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health)
 
 
 def gameInitialize():
@@ -343,14 +394,14 @@ def gameInitialize():
     # starts the player at (mainStartRow, 0)
     # TODO: refactor spawning
     adjacent = False
-    for cord in prevPoints[3:]:
+    for cord in mapGenerator.prevPoints[3:]:
         # spawns skeleton with a 10% chance per tile
         if not adjacent:
             if random.randint(0, 101) <= 10:
                 adjacent = True
                 # sets adjacent to True so enemies cannot spawn next to directly next to each other
                 # (technically can since only works for one tile)
-                gameObjects.append(Creatures(cord[0], cord[1], "Skeleton", constants.skeleton, 'enemy', 2, 2, 5, 8))
+                gameObjects.append(Creatures(cord[0], cord[1], "Skeleton", constants.skeletonBox, 'enemy', 2, 2, 5, 8))
                 # adds enemy to object list (will be drawn in gameDraw())
                 continue
         if adjacent:
