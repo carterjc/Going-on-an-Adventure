@@ -61,6 +61,10 @@ warriorRaw = pygame.image.load('./GameAssets/RawImages/warrior.png')
 archerRaw = pygame.image.load('./GameAssets/RawImages/archer.png')
 assassinRaw = pygame.image.load('./GameAssets/RawImages/assassin.png')
 
+# Character Reflection Page
+# reflectionBackgroundColor = (199, 255, 218)
+reflectionBackgroundColor = (127, 209, 185)
+
 
 class playerCharacters:
     def __init__(self, name, speed, strength, defense, health, imageRaw, imageBox, introText):

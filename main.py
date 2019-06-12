@@ -43,7 +43,8 @@ class Creatures(ObjActor):
     # creatures have speed, strength, defense, and health
     # they can receive and dish damage and can die
     # sub class of actor
-    def __init__(self, row, column, name, sprite, classType, speed, strength, defense, health):
+    def __init__(self, row, column, name, sprite, classType, speed, strength, defense, health, currXP, neededXP, level, XPGiven=0):
+        # XP Given is for non-players
         super().__init__(row, column, name, sprite, classType)
         self.speed = speed
         self.strength = strength
@@ -51,6 +52,10 @@ class Creatures(ObjActor):
         self.maxhealth = health
         # .maxhealth won't change while health will
         self.health = health
+        self.currXP = int(currXP)
+        self.neededXP = int(neededXP)
+        self.level = level
+        self.XPGiven = XPGiven
 
     def dodge(self, speed):
         speed = self.speed
@@ -67,6 +72,8 @@ class Creatures(ObjActor):
         if not dodge:
             self.health -= damage
             if self.health <= 0:
+                if self.classType == "enemy":
+                    self.gainXP()
                 self.death()
                 print(self.name + " has perished in battle.")
             else:
@@ -142,6 +149,39 @@ class Creatures(ObjActor):
             r, g, b = colorsys.hsv_to_rgb(h, s, v)
             color = [int(255*r), int(255*g), int(255*b)]
             pygame.draw.line(mainDisplay, color, lineStart, lineEnd, 10)
+
+    def levelUP(self):
+        # Checks if the player can level up and does so if true
+        if self.currXP >= self.neededXP:
+            self.level += 1
+            self.currXP = 0
+            self.neededXP = (((self.level ** 2 + self.level) / 2) * 100) - (self.level * 100)
+        else:
+            return
+            # Can return a value if needed later
+
+    def displayXPBar(self):
+        self.levelUP()
+        xpos = constants.displaySize[0]*.3
+        ypos = constants.displaySize[1]*.1
+        width = constants.displaySize[0]*.8 - xpos
+        height = constants.displaySize[1]*.2 - ypos
+        color = (0, 0, 0)
+        mainXPRect = pygame.draw.rect(mainDisplay, color, (xpos, ypos, width, height), 1)
+        percentageFilled = self.currXP/self.neededXP
+        XPRect = pygame.draw.rect(mainDisplay, color, (xpos, ypos, width * percentageFilled, height))
+
+    def gainXP(self):
+        # Allows the player to gain XP from killing an enemy
+        # Self refers to the enemy (called from the take damage procedure) - global player is also called
+        player.currXP += int(self.XPGiven)
+#         TODO: Cool animation?
+
+    def levelReset(self, mainStartRow):
+        # for player to reset col pos, but not currXP
+        self.column = 0
+        self.row = mainStartRow
+        self.health = self.maxhealth
 
 
 def fadeIn(color=(211, 211, 211)):
@@ -294,11 +334,11 @@ def about():
 
 
 def mainMenu():
-    mainMenu = True
-    while mainMenu:
+    mainMenuOpen = True
+    while mainMenuOpen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                mainMenu = False
+                mainMenuOpen = False
         # Takes the desired background image and stretches it to the screen size
         backgroundImage = pygame.transform.scale(constants.menuBackground, constants.displaySize)
         # Displays background image
@@ -314,6 +354,39 @@ def mainMenu():
         pygame.display.flip()
     pygame.quit()
     exit()
+
+
+def characterReflection():
+    fadeIn()
+    open = True
+    while open:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                open = False
+            mainDisplay.fill(constants.reflectionBackgroundColor)
+            # gets constant.(desiredplayer), then constants.desiredplayer.imageRaw
+            playerChar = getattr(constants, str.lower(player.name))
+            playerImage = pygame.transform.scale(getattr(playerChar, "imageRaw"), (150, 150))
+            mainDisplay.blit(playerImage, (0, 0))
+            # Displays updated XP bar
+            player.displayXPBar()
+            # Note: these values are based off the position of the XP bar in displayXPBar()
+            displayText("You are level " + str(player.level) + "!", "Calibri", 25, constants.displaySize[0]*.3, constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0]/2)
+            displayText("You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 25, constants.displaySize[0]*.8 - getTextDimension("width", "You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 25), constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0])
+            button("Continue On!", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.3, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, gameInitialize)
+            button("Home", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.7 - constants.menuButtonWidth, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
+            pygame.display.flip()
+    pygame.quit()
+    exit()
+
+
+def endLevel():
+    if player.column == constants.mapColumns-1:
+        endLevel = True
+        characterReflection()
+    #     Call new screen that showcases XP, etc
+    else:
+        return
 
 
 def initMap(gameMap):
@@ -348,6 +421,8 @@ def gameMain():
         if playerAction == "quit":
             gameQuit = True
         drawGame()
+        # Checks if the player has reached the final tile
+        endLevel()
     pygame.quit()
     exit()
 
@@ -381,16 +456,16 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
-        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health)
+        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)
     elif playerSelection == "Assassin":
         # Generates assassin as player if that is selected
-        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health)
+        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1)
     elif playerSelection == "Archer":
         # Generates archer as player if that is selected
-        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health)
+        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1)
 
 
 def gameInitialize():
@@ -398,8 +473,11 @@ def gameInitialize():
     global mainDisplay, gameMap, player, gameObjects
     gameMap, mainStartRow = mapGenerator.main() # returns map and mainStartRow (initial path start row)
     gameObjects = []
-    # TODO: Factor in the selected player
-    player = selectPlayer(mainStartRow)
+    try:
+        player
+        player.levelReset(mainStartRow)
+    except NameError:
+        player = selectPlayer(mainStartRow)
     gameObjects.append(player)
     # starts the player at (mainStartRow, 0)
     # TODO: refactor spawning
@@ -411,7 +489,7 @@ def gameInitialize():
                 adjacent = True
                 # sets adjacent to True so enemies cannot spawn next to directly next to each other
                 # (technically can since only works for one tile)
-                gameObjects.append(Creatures(cord[0], cord[1], "Skeleton", constants.skeletonBox, 'enemy', 2, 2, 5, 8))
+                gameObjects.append(Creatures(cord[0], cord[1], "Skeleton", constants.skeletonBox, 'enemy', 2, 2, 5, 8, 0, 100, 1, 10))
                 # adds enemy to object list (will be drawn in gameDraw())
                 continue
         if adjacent:

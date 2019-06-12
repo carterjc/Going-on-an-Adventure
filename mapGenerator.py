@@ -13,6 +13,7 @@ prevPoints = []
 def refreshMap(rowLen, colLen):
     # allows map of rowLen x colLen to be generated
     global myMap
+    myMap = []
     for i in range(0, rowLen):
         myMap.append([])
         for x in range(0, colLen):
@@ -124,12 +125,8 @@ def main():
         newStartRow = int(mainStartRow + ((len(myMap)/2)-(random.randint(0, mainStartRow+1))))
     else:
         newStartRow = int(mainStartRow - ((len(myMap)/2)-(random.randint(0, mainStartRow+1))))
-    createPath(newStartRow, 0, 'null', len(myMap[0])-1, 'another_path')
+    # createPath(newStartRow, 0, 'null', len(myMap[0])-1, 'another_path')
     # end Row is random for the first path, so the placeholder is 'null'
     # while current column is less than the max column
     addPaths()
     return myMap, mainStartRow
-
-# main()
-# for i in range(len(myMap)):
-#     print(myMap[i])
