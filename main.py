@@ -278,6 +278,8 @@ def chooseCharacter():
         playerButton("Warrior", playerOptionsFinal[1], 0, 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.warrior.introText, (int(constants.displaySize[1]/2.5)))
         playerButton("Assassin", playerOptionsFinal[2], (constants.displaySize[1]/2) + constants.characterImageSize[0], 75, constants.characterImageSize[0], constants.characterImageSize[1], constants.assassin.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
         playerButton("Archer", playerOptionsFinal[3], (constants.displaySize[1]/2) + constants.characterImageSize[0], 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.archer.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
+        button("Home", constants.menuButtonFont, constants.menuButtonFontSize, (255, 255, 255), 0, 0, constants.menuButtonWidth, constants.menuButtonHeight, (0, 0, 0), (0, 0, 0), mainMenu)
+        # TODO: Make the button a better color
         if playerSelection != "None":
             confirmOpen = True
             while confirmOpen:
@@ -334,6 +336,7 @@ def about():
 
 
 def mainMenu():
+    time.sleep(.2)
     mainMenuOpen = True
     while mainMenuOpen:
         for event in pygame.event.get():
@@ -372,7 +375,7 @@ def characterReflection():
             player.displayXPBar()
             # Note: these values are based off the position of the XP bar in displayXPBar()
             displayText("You are level " + str(player.level) + "!", "Calibri", 25, constants.displaySize[0]*.3, constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0]/2)
-            displayText("You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 25, constants.displaySize[0]*.8 - getTextDimension("width", "You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 25), constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0])
+            displayText("You have " + str(player.currXP) + "/" + str(int(player.neededXP)) + " XP", "Calibri", 25, constants.displaySize[0]*.8 - getTextDimension("width", "You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 25), constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0])
             button("Continue On!", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.3, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, gameInitialize)
             button("Home", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.7 - constants.menuButtonWidth, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
             pygame.display.flip()
