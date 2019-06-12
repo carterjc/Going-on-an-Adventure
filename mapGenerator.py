@@ -1,4 +1,4 @@
-# this program is designed to generate a random path on a 15 x 20 tile map
+# this program is designed to generate a random path on a x * y tile map
 
 # 3rd party libraries
 import random
@@ -6,7 +6,6 @@ import random
 # Homemade
 import constants
 
-myMap = []
 prevPoints = []
 
 

@@ -10,6 +10,7 @@ import mapGenerator
 target = 'None'
 pygame.init()
 mainDisplay = pygame.display.set_mode((constants.mapColumns * constants.cellWidth, constants.mapRows * constants.cellHeight))
+newGame = False
 # TODO
 
 
@@ -155,7 +156,8 @@ class Creatures(ObjActor):
         if self.currXP >= self.neededXP:
             self.level += 1
             self.currXP = 0
-            self.neededXP = (((self.level ** 2 + self.level) / 2) * 100) - (self.level * 100)
+            self.neededXP = ((self.level/.5)**2)+96
+            self.statUpgrade()
         else:
             return
             # Can return a value if needed later
@@ -183,6 +185,25 @@ class Creatures(ObjActor):
         self.row = mainStartRow
         self.health = self.maxhealth
 
+    def statUpgrade(self):
+        if self.currXP == 0:
+            upgradeScreen()
+
+def upgradeScreen():
+    upgrade = True
+    while upgrade:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                upgrade = False
+            upgrade_screenWidth = int(constants.displaySize[1]/2)
+            upgrade_screenHeight = int(constants.displaySize[0]/2)
+            upgrade_screen = pygame.display.set_mode(upgrade_screenHeight, upgrade_screenWidth)
+            upgrade_screen.fill((211, 211, 211))
+            button("Upgrade Speed", constants.menuButtonFont, 15, (255, 255, 255), upgrade_screenWidth*.1, upgrade_screenHeight*.7, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
+            mainDisplay.blit(upgrade_screen, ((constants.displaySize[0] - constants.displaySize[0]/2)/2, (constants.displaySize[1] - upgrade_screenWidth)/2))
+            pygame.display.flip()
+    pygame.quit()
+    exit()
 
 def fadeIn(color=(211, 211, 211)):
     fadeSurface = pygame.Surface((constants.displaySize[0], constants.displaySize[1]))
@@ -252,6 +273,8 @@ def playerButton(playerName, image, xpos, ypos, width, height, text, maxWidth):
 
 
 def chooseCharacter():
+    global newGame
+    newGame = True
     # TODO: Make screen based in percentages so it works with all screens
     global playerSelection
     time.sleep(.2)
@@ -459,16 +482,16 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 104, 1)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
-        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 104, 1)
     elif playerSelection == "Assassin":
         # Generates assassin as player if that is selected
-        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 104, 1)
     elif playerSelection == "Archer":
         # Generates archer as player if that is selected
-        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 104, 1)
 
 
 def gameInitialize():
@@ -476,6 +499,8 @@ def gameInitialize():
     global mainDisplay, gameMap, player, gameObjects
     gameMap, mainStartRow = mapGenerator.main() # returns map and mainStartRow (initial path start row)
     gameObjects = []
+    if newGame == "True":
+        player = selectPlayer(mainStartRow)
     try:
         player
         player.levelReset(mainStartRow)
