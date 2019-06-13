@@ -76,7 +76,6 @@ class Creatures(ObjActor):
                 if self.classType == "enemy":
                     self.gainXP()
                 self.death()
-                print(self.name + " has perished in battle.")
             else:
                 print(self.name + " took " + str(damage)+" damage.")
                 print(self.name + " has " + str(self.health) + " health remaining.")
@@ -130,9 +129,8 @@ class Creatures(ObjActor):
             if object.health <= 0:
                 deadIndex = count
                 del gameObjects[deadIndex]
-                break
-        for object in gameObjects:
-            object.draw()
+                print(self.name + " has perished in battle.")
+                return
 
     def createHealthBar(self):
         # creates health bar using maxhealth, health, and position (row, column)
@@ -177,6 +175,7 @@ class Creatures(ObjActor):
         # Allows the player to gain XP from killing an enemy
         # Self refers to the enemy (called from the take damage procedure) - global player is also called
         player.currXP += int(self.XPGiven)
+        print(str(player.name) + " received " + str(self.XPGiven) + " XP!")
 #         TODO: Cool animation?
 
     def levelReset(self, mainStartRow):
@@ -188,6 +187,7 @@ class Creatures(ObjActor):
     def statUpgrade(self):
         if self.currXP == 0:
             upgradeScreen()
+
 
 def upgradeScreen():
     upgrade = True
@@ -204,6 +204,7 @@ def upgradeScreen():
             pygame.display.flip()
     pygame.quit()
     exit()
+
 
 def fadeIn(color=(211, 211, 211)):
     fadeSurface = pygame.Surface((constants.displaySize[0], constants.displaySize[1]))
@@ -482,16 +483,16 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 104, 1)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
-        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 104, 1)
+        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)
     elif playerSelection == "Assassin":
         # Generates assassin as player if that is selected
-        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 104, 1)
+        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1)
     elif playerSelection == "Archer":
         # Generates archer as player if that is selected
-        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 104, 1)
+        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1)
 
 
 def gameInitialize():
@@ -499,7 +500,7 @@ def gameInitialize():
     global mainDisplay, gameMap, player, gameObjects
     gameMap, mainStartRow = mapGenerator.main() # returns map and mainStartRow (initial path start row)
     gameObjects = []
-    if newGame == "True":
+    if newGame:
         player = selectPlayer(mainStartRow)
     try:
         player
