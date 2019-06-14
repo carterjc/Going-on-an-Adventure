@@ -111,6 +111,7 @@ class Creatures(ObjActor):
         dodge = target.dodge(target.speed)
         if not dodge:
             target.takeDamage(damage)
+            print(target.health)
             if target.health >= 0:
                 # Damage is equal to target's strength
                 # Could assign local var here and create formula
@@ -152,10 +153,14 @@ class Creatures(ObjActor):
     def levelUP(self):
         # Checks if the player can level up and does so if true
         if self.currXP >= self.neededXP:
+            extraXP = self.currXP - self.neededXP
             self.level += 1
             self.currXP = 0
+            self.currXP += extraXP
             self.neededXP = ((self.level/.5)**2)+96
-            self.statUpgrade()
+            if self.currXP >= self.neededXP:
+                self.levelUP()
+            upgradeScreen()
         else:
             return
             # Can return a value if needed later
@@ -183,10 +188,6 @@ class Creatures(ObjActor):
         self.column = 0
         self.row = mainStartRow
         self.health = self.maxhealth
-
-    def statUpgrade(self):
-        if self.currXP == 0:
-            upgradeScreen()
 
     def upgradeSpeed(self):
         self.speed += 1
@@ -219,6 +220,7 @@ def upgradeScreen(upgrade=True):
             color = (211, 211, 211)
             upgrade_screen = pygame.draw.rect(mainDisplay, color, (xpos, ypos, upgrade_screenWidth, upgrade_screenHeight))
             button("Upgrade Speed", constants.menuButtonFont, 15, (255, 255, 255), xpos + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.3), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeSpeed)
+            button("Upgrade Strength", constants.menuButtonFont, 15, (255, 255, 255), xpos + (upgrade_screenWidth*.1) + constants.menuButtonWidth*1.2, ypos + (upgrade_screenHeight*.3), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeStrength)
             # mainDisplay.blit(upgrade_screen, ((constants.displaySize[0] - constants.displaySize[0]/2)/2, (constants.displaySize[1] - upgrade_screenWidth)/2))
             pygame.display.flip()
     characterReflection()
