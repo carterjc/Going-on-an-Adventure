@@ -188,22 +188,41 @@ class Creatures(ObjActor):
         if self.currXP == 0:
             upgradeScreen()
 
+    def upgradeSpeed(self):
+        self.speed += 1
+        upgradeScreen(False)
 
-def upgradeScreen():
-    upgrade = True
+    def upgradeStrength(self):
+        self.strength += 1
+        upgradeScreen(False)
+
+    def upgradeDefense(self):
+        self.defense += 1
+        upgradeScreen(False)
+
+    def upgradeHealth(self):
+        self.health += 3
+        upgradeScreen(False)
+
+
+def upgradeScreen(upgrade=True):
+    print(player.speed)
     while upgrade:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                upgrade = False
-            upgrade_screenWidth = int(constants.displaySize[1]/2)
-            upgrade_screenHeight = int(constants.displaySize[0]/2)
-            upgrade_screen = pygame.display.set_mode(upgrade_screenHeight, upgrade_screenWidth)
-            upgrade_screen.fill((211, 211, 211))
-            button("Upgrade Speed", constants.menuButtonFont, 15, (255, 255, 255), upgrade_screenWidth*.1, upgrade_screenHeight*.7, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
-            mainDisplay.blit(upgrade_screen, ((constants.displaySize[0] - constants.displaySize[0]/2)/2, (constants.displaySize[1] - upgrade_screenWidth)/2))
+                pygame.quit()
+                exit()
+            upgrade_screenWidth = int(constants.displaySize[0]*.6)
+            upgrade_screenHeight = int(constants.displaySize[1]*.4)
+            xpos = (constants.displaySize[0] - upgrade_screenWidth)/2
+            ypos = (constants.displaySize[1] - upgrade_screenHeight)/2
+            color = (211, 211, 211)
+            upgrade_screen = pygame.draw.rect(mainDisplay, color, (xpos, ypos, upgrade_screenWidth, upgrade_screenHeight))
+            button("Upgrade Speed", constants.menuButtonFont, 15, (255, 255, 255), xpos + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.3), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeSpeed)
+            # mainDisplay.blit(upgrade_screen, ((constants.displaySize[0] - constants.displaySize[0]/2)/2, (constants.displaySize[1] - upgrade_screenWidth)/2))
             pygame.display.flip()
-    pygame.quit()
-    exit()
+    characterReflection()
+
 
 
 def fadeIn(color=(211, 211, 211)):
@@ -408,6 +427,8 @@ def characterReflection():
 
 
 def endLevel():
+    global newGame
+    newGame = False
     if player.column == constants.mapColumns-1:
         endLevel = True
         characterReflection()
@@ -483,7 +504,7 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 1, 1)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
         return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)

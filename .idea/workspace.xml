@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="987a3c8d-eebb-43a3-aa87-ea32efb93008" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/MapGen.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MapGen.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -27,8 +25,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="153" column="40" lean-forward="true" selection-start-line="153" selection-start-column="40" selection-end-line="153" selection-end-column="40" />
+            <state relative-caret-position="287">
+              <caret line="221" column="33" lean-forward="true" selection-start-line="221" selection-start-column="33" selection-end-line="221" selection-end-column="33" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -79,7 +77,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
+    <option name="x" value="-1810" />
     <option name="y" value="-8" />
     <option name="width" value="1616" />
     <option name="height" value="876" />
@@ -93,7 +91,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../memeGenerator" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
@@ -222,7 +220,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="2576" height="1416" extended-state="6" />
+    <frame x="-1928" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.5931559" />
@@ -230,7 +228,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3257989" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.45287108" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3998441" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -249,7 +247,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32735777" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.45287108" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3998441" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -296,8 +294,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="153" column="40" lean-forward="true" selection-start-line="153" selection-start-column="40" selection-end-line="153" selection-end-column="40" />
+        <state relative-caret-position="287">
+          <caret line="221" column="33" lean-forward="true" selection-start-line="221" selection-start-column="33" selection-end-line="221" selection-end-column="33" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
