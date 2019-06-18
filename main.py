@@ -166,7 +166,7 @@ class Creatures(ObjActor):
             self.neededXP = ((self.level/.5)**2)+96
             upgradeScreen()
         else:
-            characterReflection()
+            return
 
     def displayXPBar(self):
         width = constants.displaySize[0]*.5
@@ -194,18 +194,22 @@ class Creatures(ObjActor):
         self.health = self.maxhealth
 
     def upgradeSpeed(self):
+        print("You have upgraded your speed by one!")
         self.speed += 1
         upgradeScreen(False)
 
     def upgradeStrength(self):
+        print("You have upgraded your strength by one!")
         self.strength += 1
         upgradeScreen(False)
 
     def upgradeDefense(self):
+        print("You have upgraded your defense by one!")
         self.defense += 1
         upgradeScreen(False)
 
     def upgradeHealth(self):
+        print("You have upgraded your health by three!")
         self.maxhealth += 3
         upgradeScreen(False)
 
@@ -229,6 +233,7 @@ def upgradeScreen(upgrade=True):
             button("Upgrade Health", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth/2) + (upgrade_screenWidth*.1), ypos + ((upgrade_screenHeight*.8)-constants.menuButtonHeight), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeHealth)
             pygame.display.flip()
     player.levelUP()
+    characterReflection()
 
 
 def deathScreen():
@@ -265,7 +270,7 @@ def continueLife():
 def darkenScreen(color=(211, 211, 211)):
     darkScreen = pygame.Surface((constants.displaySize[0], constants.displaySize[1]))
     # Each stage of the forest increases the alpha by 10
-    alpha = player.forestPos * 10
+    alpha = player.forestPos * 5
     darkScreen.set_alpha(alpha)
     mainDisplay.blit(darkScreen, (0, 0))
 
@@ -448,6 +453,7 @@ def mainMenu():
 
 
 def characterReflection():
+    forestDistance = int(player.forestPos*(constants.cellWidth*constants.mapRows)+random.randint(0, 200))
     open = True
     while open:
         for event in pygame.event.get():
@@ -464,7 +470,7 @@ def characterReflection():
             displayText("You are level " + str(player.level) + "!", "Calibri", 20, barXpos, constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0]/2)
             displayText("You have " + str(int(player.currXP)) + "/" + str(int(player.neededXP)) + " XP", "Calibri", 20, (barXpos + (constants.displaySize[0]*.5)) - getTextDimension("width", "You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 20), constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0])
             border = pygame.draw.rect(mainDisplay, (0, 0, 0), (constants.displaySize[0]*.1, constants.displaySize[1]*.35, constants.displaySize[0]*.8, 4))
-            displayText("You have traveled " + str(int(player.forestPos*(constants.cellWidth*constants.mapRows))) + " meters into the forest!", "Calibri", 20, barXpos, constants.displaySize[1]*.4, (0, 0, 0), constants.displaySize[0])
+            displayText("You have traveled " + str(forestDistance) + " meters into the forest!", "Calibri", 20, barXpos, constants.displaySize[1]*.4, (0, 0, 0), constants.displaySize[0])
             if player.enemiesKilled == 1:
                 display_text = "You have killed one enemy!"
             elif player.enemiesKilled == 0:
@@ -591,7 +597,7 @@ def gameInitialize():
     # starts the player at (mainStartRow, 0)
     # TODO: refactor spawning
     adjacent = False
-    for cord in mapGenerator.prevPoints[3:]:
+    for cord in mapGenerator.prevPoints[5:]:
         # spawns skeleton with a 10% chance per tile
         if not adjacent:
             if random.randint(0, 101) <= 10:
