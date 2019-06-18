@@ -1,9 +1,7 @@
 import pygame
 import random
 import colorsys
-import textwrap
 import time
-
 import constants
 import mapGenerator
 
@@ -11,7 +9,7 @@ target = 'None'
 pygame.init()
 mainDisplay = pygame.display.set_mode((constants.mapColumns * constants.cellWidth, constants.mapRows * constants.cellHeight))
 newGame = False
-# TODO
+pygame.display.set_icon(constants.gameIcon)
 
 
 class ObjActor:
@@ -44,7 +42,7 @@ class Creatures(ObjActor):
     # creatures have speed, strength, defense, and health
     # they can receive and dish damage and can die
     # sub class of actor
-    def __init__(self, row, column, name, sprite, classType, speed, strength, defense, health, currXP, neededXP, level, XPGiven=0):
+    def __init__(self, row, column, name, sprite, classType, speed, strength, defense, health, currXP, neededXP, level, XPGiven=0, forestPos=0, enemiesKilled=0):
         # XP Given is for non-players
         super().__init__(row, column, name, sprite, classType)
         self.speed = speed
@@ -57,6 +55,8 @@ class Creatures(ObjActor):
         self.neededXP = int(neededXP)
         self.level = level
         self.XPGiven = XPGiven
+        self.forestPos = forestPos
+        self.enemiesKilled = enemiesKilled
 
     def dodge(self, speed):
         speed = self.speed
@@ -72,10 +72,15 @@ class Creatures(ObjActor):
         dodge = self.dodge(self.speed)
         if not dodge:
             self.health -= damage
+            drawGame()
             if self.health <= 0:
                 if self.classType == "enemy":
                     self.gainXP()
-                self.death()
+                    player.enemiesKilled += 1
+                    self.death()
+                if self.classType == "player":
+                    print(self.name + " has perished in battle.")
+                    deathScreen()
             else:
                 print(self.name + " took " + str(damage)+" damage.")
                 print(self.name + " has " + str(self.health) + " health remaining.")
@@ -111,14 +116,13 @@ class Creatures(ObjActor):
         dodge = target.dodge(target.speed)
         if not dodge:
             target.takeDamage(damage)
-            print(target.health)
-            if target.health >= 0:
+            if target.health > 0:
                 # Damage is equal to target's strength
                 # Could assign local var here and create formula
                 self.takeDamage(target.strength)
         else:
             print(target.name + " dodged the attack.")
-            if target.health >= 0:
+            if target.health > 0:
                 self.takeDamage(target.strength)
         # TODO: implement way to consider defense/give defense an effect
 
@@ -149,6 +153,8 @@ class Creatures(ObjActor):
             r, g, b = colorsys.hsv_to_rgb(h, s, v)
             color = [int(255*r), int(255*g), int(255*b)]
             pygame.draw.line(mainDisplay, color, lineStart, lineEnd, 10)
+        else:
+            return
 
     def levelUP(self):
         # Checks if the player can level up and does so if true
@@ -158,23 +164,21 @@ class Creatures(ObjActor):
             self.currXP = 0
             self.currXP += extraXP
             self.neededXP = ((self.level/.5)**2)+96
-            if self.currXP >= self.neededXP:
-                self.levelUP()
             upgradeScreen()
         else:
-            return
-            # Can return a value if needed later
+            characterReflection()
 
     def displayXPBar(self):
-        self.levelUP()
-        xpos = constants.displaySize[0]*.3
+        width = constants.displaySize[0]*.5
+        height = constants.displaySize[1]*.1
+        xpos = (constants.displaySize[0]-width)/2
         ypos = constants.displaySize[1]*.1
-        width = constants.displaySize[0]*.8 - xpos
-        height = constants.displaySize[1]*.2 - ypos
         color = (0, 0, 0)
+        # XPBar rect is drawn first so there is a black outline
+        percentageFilled = self.currXP / self.neededXP
+        XPcolor = (77, 170, 87)
+        XPRect = pygame.draw.rect(mainDisplay, XPcolor, (xpos, ypos, min(width * percentageFilled, width), height))
         mainXPRect = pygame.draw.rect(mainDisplay, color, (xpos, ypos, width, height), 1)
-        percentageFilled = self.currXP/self.neededXP
-        XPRect = pygame.draw.rect(mainDisplay, color, (xpos, ypos, width * percentageFilled, height))
 
     def gainXP(self):
         # Allows the player to gain XP from killing an enemy
@@ -202,12 +206,11 @@ class Creatures(ObjActor):
         upgradeScreen(False)
 
     def upgradeHealth(self):
-        self.health += 3
+        self.maxhealth += 3
         upgradeScreen(False)
 
 
 def upgradeScreen(upgrade=True):
-    print(player.speed)
     while upgrade:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -219,12 +222,52 @@ def upgradeScreen(upgrade=True):
             ypos = (constants.displaySize[1] - upgrade_screenHeight)/2
             color = (211, 211, 211)
             upgrade_screen = pygame.draw.rect(mainDisplay, color, (xpos, ypos, upgrade_screenWidth, upgrade_screenHeight))
-            button("Upgrade Speed", constants.menuButtonFont, 15, (255, 255, 255), xpos + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.3), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeSpeed)
-            button("Upgrade Strength", constants.menuButtonFont, 15, (255, 255, 255), xpos + (upgrade_screenWidth*.1) + constants.menuButtonWidth*1.2, ypos + (upgrade_screenHeight*.3), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeStrength)
-            # mainDisplay.blit(upgrade_screen, ((constants.displaySize[0] - constants.displaySize[0]/2)/2, (constants.displaySize[1] - upgrade_screenWidth)/2))
+            textColor = (0, 0, 0)
+            button("Upgrade Speed", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.2), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeSpeed)
+            button("Upgrade Strength", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth/2) + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.2), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeStrength)
+            button("Upgrade Defense", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth*.1), ypos + ((upgrade_screenHeight*.8)-constants.menuButtonHeight), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeDefense)
+            button("Upgrade Health", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth/2) + (upgrade_screenWidth*.1), ypos + ((upgrade_screenHeight*.8)-constants.menuButtonHeight), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, player.upgradeHealth)
             pygame.display.flip()
-    characterReflection()
+    player.levelUP()
 
+
+def deathScreen():
+    global target
+    target = 'None'
+    dead = True
+    while dead:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.exit()
+                exit()
+            upgrade_screenWidth = int(constants.displaySize[0]*.6)
+            upgrade_screenHeight = int(constants.displaySize[1]*.4)
+            xpos = (constants.displaySize[0] - upgrade_screenWidth)/2
+            ypos = (constants.displaySize[1] - upgrade_screenHeight)/2
+            color = (211, 211, 211)
+            upgrade_screen = pygame.draw.rect(mainDisplay, color, (xpos, ypos, upgrade_screenWidth, upgrade_screenHeight))
+            textColor = (0, 0, 0)
+            displayText("You Died!", constants.menuButtonFont, 35, (constants.displaySize[0] - getTextDimension("width", "You Died!", constants.menuButtonFont, 35)) / 2, ypos + (constants.displaySize[1] * .05), (0, 0, 0), constants.displaySize[0] / 2 + 100)
+            button("I'm Going Back", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.5), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, continueLife)
+            button("Take Me Home", constants.menuButtonFont, 15, textColor, xpos + (upgrade_screenWidth/2) + (upgrade_screenWidth*.1), ypos + (upgrade_screenHeight*.5), constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
+            pygame.display.flip()
+
+
+def continueLife():
+    # Refers to when a player dies and continues playing
+    if player.forestPos >= 2:
+        player.forestPos -= 2
+    else:
+        player.forestPos = 0
+    gameInitialize()
+
+
+def darkenScreen(color=(211, 211, 211)):
+    darkScreen = pygame.Surface((constants.displaySize[0], constants.displaySize[1]))
+    # Each stage of the forest increases the alpha by 10
+    alpha = player.forestPos * 10
+    darkScreen.set_alpha(alpha)
+    mainDisplay.blit(darkScreen, (0, 0))
 
 
 def fadeIn(color=(211, 211, 211)):
@@ -237,8 +280,8 @@ def fadeIn(color=(211, 211, 211)):
         time.sleep(.001)
 
 
-def displayText(text, font, fontSize, xpos, ypos, textColor, maxWidth, aa=False, bkg=None):
-    font = pygame.font.SysFont(font, fontSize)
+def displayText(text, myfont, fontSize, xpos, ypos, textColor, maxWidth, aa=False, bkg=None):
+    font = pygame.font.SysFont(myfont, fontSize)
     rect = pygame.Rect(xpos, ypos, maxWidth, constants.displaySize[1])
     y = rect.top
     lineSpacing = -2
@@ -323,7 +366,7 @@ def chooseCharacter():
         playerButton("Warrior", playerOptionsFinal[1], 0, 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.warrior.introText, (int(constants.displaySize[1]/2.5)))
         playerButton("Assassin", playerOptionsFinal[2], (constants.displaySize[1]/2) + constants.characterImageSize[0], 75, constants.characterImageSize[0], constants.characterImageSize[1], constants.assassin.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
         playerButton("Archer", playerOptionsFinal[3], (constants.displaySize[1]/2) + constants.characterImageSize[0], 275, constants.characterImageSize[0], constants.characterImageSize[1], constants.archer.introText, constants.displaySize[1] - (int(constants.displaySize[1]/2)))
-        button("Home", constants.menuButtonFont, constants.menuButtonFontSize, (255, 255, 255), 0, 0, constants.menuButtonWidth, constants.menuButtonHeight, (0, 0, 0), (0, 0, 0), mainMenu)
+        button("Home", constants.menuButtonFont, constants.menuButtonFontSize, (255, 255, 255), 0, 0, constants.menuButtonWidth, constants.menuButtonHeight, (0, 0, 0), (53, 54, 53), mainMenu)
         # TODO: Make the button a better color
         if playerSelection != "None":
             confirmOpen = True
@@ -405,7 +448,6 @@ def mainMenu():
 
 
 def characterReflection():
-    fadeIn()
     open = True
     while open:
         for event in pygame.event.get():
@@ -415,15 +457,26 @@ def characterReflection():
             # gets constant.(desiredplayer), then constants.desiredplayer.imageRaw
             playerChar = getattr(constants, str.lower(player.name))
             playerImage = pygame.transform.scale(getattr(playerChar, "imageRaw"), (150, 150))
-            mainDisplay.blit(playerImage, (0, 0))
-            # Displays updated XP bar
             player.displayXPBar()
+            mainDisplay.blit(playerImage, (0, 0))
             # Note: these values are based off the position of the XP bar in displayXPBar()
-            displayText("You are level " + str(player.level) + "!", "Calibri", 25, constants.displaySize[0]*.3, constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0]/2)
-            displayText("You have " + str(player.currXP) + "/" + str(int(player.neededXP)) + " XP", "Calibri", 25, constants.displaySize[0]*.8 - getTextDimension("width", "You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 25), constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0])
+            barXpos = (constants.displaySize[0] - (constants.displaySize[0]*.5))/2
+            displayText("You are level " + str(player.level) + "!", "Calibri", 20, barXpos, constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0]/2)
+            displayText("You have " + str(int(player.currXP)) + "/" + str(int(player.neededXP)) + " XP", "Calibri", 20, (barXpos + (constants.displaySize[0]*.5)) - getTextDimension("width", "You have " + str(player.currXP) + "/" + str(player.neededXP) + " XP", "Calibri", 20), constants.displaySize[1]*.25, (0, 0, 0), constants.displaySize[0])
+            border = pygame.draw.rect(mainDisplay, (0, 0, 0), (constants.displaySize[0]*.1, constants.displaySize[1]*.35, constants.displaySize[0]*.8, 4))
+            displayText("You have traveled " + str(int(player.forestPos*(constants.cellWidth*constants.mapRows))) + " meters into the forest!", "Calibri", 20, barXpos, constants.displaySize[1]*.4, (0, 0, 0), constants.displaySize[0])
+            if player.enemiesKilled == 1:
+                display_text = "You have killed one enemy!"
+            elif player.enemiesKilled == 0:
+                display_text = "You have not killed any enemies."
+            else:
+                display_text = "You have killed " + str(player.enemiesKilled) + " enemies!"
+            displayText(display_text, "Calibri", 20, barXpos, constants.displaySize[1]*.5, (0, 0, 0), constants.displaySize[0])
             button("Continue On!", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.3, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, gameInitialize)
             button("Home", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.7 - constants.menuButtonWidth, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
             pygame.display.flip()
+            player.levelUP()
+            player.displayXPBar()
     pygame.quit()
     exit()
 
@@ -433,6 +486,7 @@ def endLevel():
     newGame = False
     if player.column == constants.mapColumns-1:
         endLevel = True
+        fadeIn()
         characterReflection()
     #     Call new screen that showcases XP, etc
     else:
@@ -460,8 +514,6 @@ def drawGame():
     if not (target == 'None'):
         target.createHealthBar()
     # player.createHealthBar()
-    # update the display
-    pygame.display.flip()
 
 
 def gameMain():
@@ -473,6 +525,9 @@ def gameMain():
         drawGame()
         # Checks if the player has reached the final tile
         endLevel()
+        darkenScreen()
+        # update the display
+        pygame.display.flip()
     pygame.quit()
     exit()
 
@@ -506,16 +561,16 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 1, 1)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1, 0)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
-        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1, 0)
     elif playerSelection == "Assassin":
         # Generates assassin as player if that is selected
-        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1, 0)
     elif playerSelection == "Archer":
         # Generates archer as player if that is selected
-        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1)
+        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1, 0)
 
 
 def gameInitialize():
@@ -531,6 +586,8 @@ def gameInitialize():
     except NameError:
         player = selectPlayer(mainStartRow)
     gameObjects.append(player)
+    # Everytime the player passes through a section, the player ventures further into the forest
+    player.forestPos += 1
     # starts the player at (mainStartRow, 0)
     # TODO: refactor spawning
     adjacent = False

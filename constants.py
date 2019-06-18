@@ -14,18 +14,19 @@ mapColumns = 25
 
 # Sprites
 spriteWidth = 32
+gameIcon = pygame.image.load('./GameAssets/TileFit/wizardBox.png')
 # Game Sprites
 forestBox = pygame.image.load('./GameAssets/TileFit/forestBox.png')
 pathBox = pygame.image.load('./GameAssets/TileFit/pathBox.png')
 riverBox = pygame.image.load('./GameAssets/TileFit/waterBox.png')
 dirtBox = pygame.image.load('./GameAssets/TileFit/dirtBox.png')
 # Player Sprites
-wizardBox = pygame.image.load('./GameAssets/TileFit/wizardBox.png')
+wizardBox = pygame.image.load('./GameAssets/TileFit/wizardBoxTrans.png')
 warriorBox = pygame.image.load('./GameAssets/TileFit/warriorBox.png')
 assassinBox = pygame.image.load('./GameAssets/TileFit/assassinBox.png')
-archerBox = pygame.image.load('./GameAssets/TileFit/archerBox.png')
+archerBox = pygame.image.load('./GameAssets/TileFit/archerBoxTrans.png')
 # Enemy Sprites
-skeletonBox = pygame.image.load('./GameAssets/TileFit/skeletonBox.png')
+skeletonBox = pygame.image.load('./GameAssets/TileFit/skeletonBoxTrans.png')
 squirrelBox = pygame.image.load('./GameAssets/TileFit/squirrelBox.png')
 ninjaBox = pygame.image.load('./GameAssets/TileFit/ninjaBox.png')
 dragonPassiveBox = pygame.image.load('./GameAssets/TileFit/dragonPassiveBox.png')
