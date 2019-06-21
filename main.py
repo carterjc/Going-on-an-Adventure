@@ -631,41 +631,42 @@ def spawnEnemies():
     elif level > 30:
         darkWarriorSpawnChance = 20
     for cord in mapGenerator.prevPoints:
-        if pointCap - 5 < currentPoints < pointCap + 5:
-            break
-        # Spawn number allows each enemy to have a chance to be spawned at the same time
-        spawnNumber = random.randint(0, 101)
-        if not adjacent:
-            # spawns skeleton with a 10% chance per tile
-            if spawnNumber <= skeletonSpawnChance:
-                adjacent = True
-                # sets adjacent to True so enemies cannot spawn next to directly next to each other
-                # (technically can since only works for one tile)
-                gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
-                # adds enemy to object list (will be drawn in gameDraw())
-                currentPoints += constants.skeleton.pointValue
-                continue
-            # Checks to spawn squirrel
-            elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
-                adjacent = True
-                gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
-                currentPoints += constants.squirrel.pointValue
-                continue
-            # Checks to spawn ninja
-            elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
-                adjacent = True
-                gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
-                currentPoints += constants.ninja.pointValue
-                continue
-            # Checks to spawn dark warrior
-            elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
-                adjacent = True
-                gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
-                currentPoints += constants.darkWarrior.pointValue
-                continue
-        if adjacent:
-            adjacent = False
-            # figure out leveling sometime (enemies depend on level)
+        if not cord[1] == 0:
+            if pointCap - 5 < currentPoints < pointCap + 5:
+                break
+            # Spawn number allows each enemy to have a chance to be spawned at the same time
+            spawnNumber = random.randint(0, 101)
+            if not adjacent:
+                # spawns skeleton with a 10% chance per tile
+                if spawnNumber <= skeletonSpawnChance:
+                    adjacent = True
+                    # sets adjacent to True so enemies cannot spawn next to directly next to each other
+                    # (technically can since only works for one tile)
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
+                    # adds enemy to object list (will be drawn in gameDraw())
+                    currentPoints += constants.skeleton.pointValue
+                    continue
+                # Checks to spawn squirrel
+                elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
+                    adjacent = True
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
+                    currentPoints += constants.squirrel.pointValue
+                    continue
+                # Checks to spawn ninja
+                elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                    adjacent = True
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
+                    currentPoints += constants.ninja.pointValue
+                    continue
+                # Checks to spawn dark warrior
+                elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                    adjacent = True
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
+                    currentPoints += constants.darkWarrior.pointValue
+                    continue
+            if adjacent:
+                adjacent = False
+                # figure out leveling sometime (enemies depend on level)
 
 
 def gameInitialize():
