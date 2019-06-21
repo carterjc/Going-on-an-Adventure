@@ -13,7 +13,8 @@ Choose out of 4 characters:
 As you venture deeper into the forest battle different (and stronger) enemies. Some might include:
 - Skeletons
 - Vicious Squirrels
-- The Legendary Dark Knight
+- Ninjas
+- The Legendary Dark Knights
 
 Some adventurers have even warned of a dragon lurking in the depths of the forest...
 
