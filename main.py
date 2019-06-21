@@ -507,6 +507,12 @@ def endLevel():
         return
 
 
+def spawnTrees():
+    for key, value in treePos.items():
+        row, column, treeNum = value
+        mainDisplay.blit(getattr(constants, "tree" + str(treeNum)), (column * constants.cellWidth, row * constants.cellHeight))
+
+
 def initMap(gameMap):
     for row in range(0, constants.mapRows):
         for column in range(0, constants.mapColumns):
@@ -521,6 +527,7 @@ def drawGame():
     # clear the surface
     mainDisplay.fill(constants.defaultColor)
     initMap(gameMap)
+    spawnTrees()
     # draw all objects
     for object in gameObjects:
         object.draw()
@@ -575,7 +582,7 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 1, 1)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
         return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)
@@ -663,8 +670,8 @@ def spawnEnemies():
 
 def gameInitialize():
     fadeIn()
-    global mainDisplay, gameMap, player, gameObjects
-    gameMap, mainStartRow = mapGenerator.main()  # returns map and mainStartRow (initial path start row)
+    global mainDisplay, gameMap, player, gameObjects, treePos
+    gameMap, mainStartRow, treePos = mapGenerator.main()  # returns map and mainStartRow (initial path start row)
     gameObjects = []
     if newGame:
         player = selectPlayer(mainStartRow)
