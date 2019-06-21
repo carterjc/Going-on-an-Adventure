@@ -10,6 +10,8 @@ prevPoints = []
 
 
 def refreshMap(rowLen, colLen):
+    global prevPoints
+    prevPoints = []
     # allows map of rowLen x colLen to be generated
     global myMap
     myMap = []

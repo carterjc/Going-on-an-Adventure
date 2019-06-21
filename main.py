@@ -42,7 +42,7 @@ class Creatures(ObjActor):
     # creatures have speed, strength, defense, and health
     # they can receive and dish damage and can die
     # sub class of actor
-    def __init__(self, row, column, name, sprite, classType, speed, strength, defense, health, currXP, neededXP, level, XPGiven=0, forestPos=0, enemiesKilled=0):
+    def __init__(self, row, column, name, sprite, classType, speed, strength, defense, health, currXP=0, neededXP=0, level=0, XPGiven=0, forestPos=0, enemiesKilled=0):
         # XP Given is for non-players
         super().__init__(row, column, name, sprite, classType)
         self.speed = speed
@@ -237,6 +237,7 @@ def upgradeScreen(upgrade=True):
 
 
 def deathScreen():
+    darkenScreen()
     global target
     target = 'None'
     dead = True
@@ -452,6 +453,13 @@ def mainMenu():
     exit()
 
 
+def bridgeToInit():
+    # In order to make sure the player does skip an upgrade screen, this small function makes sure
+    # They cannot move on until they have leveled up completely (and upgraded)
+    if player.currXP < player.neededXP:
+        gameInitialize()
+
+
 def characterReflection():
     forestDistance = int(player.forestPos*(constants.cellWidth*constants.mapRows)+random.randint(0, 200))
     open = True
@@ -478,7 +486,7 @@ def characterReflection():
             else:
                 display_text = "You have killed " + str(player.enemiesKilled) + " enemies!"
             displayText(display_text, "Calibri", 20, barXpos, constants.displaySize[1]*.5, (0, 0, 0), constants.displaySize[0])
-            button("Continue On!", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.3, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, gameInitialize)
+            button("Continue On!", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.3, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, bridgeToInit)
             button("Home", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.7 - constants.menuButtonWidth, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
             pygame.display.flip()
             player.levelUP()
@@ -567,22 +575,96 @@ def handleKeys():
 def selectPlayer(mainStartRow):
     if playerSelection == "Wizard":
         # Generates wizard as player if that is selected
-        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 100, 1, 0)
+        return Creatures(mainStartRow, 0, constants.wizard.name, constants.wizardBox, 'player', constants.wizard.speed, constants.wizard.strength, constants.wizard.defense, constants.wizard.health, 0, 1, 1)
     elif playerSelection == "Warrior":
         # Generates warrior as player if that is selected
-        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1, 0)
+        return Creatures(mainStartRow, 0, constants.warrior.name, constants.warriorBox, 'player', constants.warrior.speed, constants.warrior.strength, constants.warrior.defense, constants.warrior.health, 0, 100, 1)
     elif playerSelection == "Assassin":
         # Generates assassin as player if that is selected
-        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1, 0)
+        return Creatures(mainStartRow, 0, constants.assassin.name, constants.assassinBox, 'player', constants.assassin.speed, constants.assassin.strength, constants.assassin.defense, constants.assassin.health, 0, 100, 1)
     elif playerSelection == "Archer":
         # Generates archer as player if that is selected
-        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1, 0)
+        return Creatures(mainStartRow, 0, constants.archer.name, constants.archerBox, 'player', constants.archer.speed, constants.archer.strength, constants.archer.defense, constants.archer.health, 0, 100, 1)
+
+
+def spawnEnemies():
+    adjacent = False
+    # point cap = 1/2 of path tiles
+    pointCap = len(mapGenerator.prevPoints)/2
+    currentPoints = 0
+    level = player.forestPos
+    skeletonSpawnChance = constants.skeleton.spawnPercent
+    if level <= 3:
+        skeletonSpawnChance = 10
+    elif 3 < level <= 10:
+        skeletonSpawnChance = (level * -1) + 13
+    elif level > 10:
+        skeletonSpawnChance = 3
+    squirrelSpawnChance = constants.squirrel.spawnPercent
+    if level < 5:
+        squirrelSpawnChance = 0
+    elif 5 <= level < 11:
+        squirrelSpawnChance = int(-1 * abs(2 * (level - 9))+10)
+    elif level >= 11:
+        squirrelSpawnChance = 6
+    ninjaSpawnChance = constants.ninja.spawnPercent
+    if level <= 6:
+        ninjaSpawnChance = 0
+    elif 7 < level <= 12:
+        ninjaSpawnChance = 2 * (level - 6)
+    elif 12 < level <= 16:
+        ninjaSpawnChance = (-1 * 2) * (level - 18)
+    elif level > 16:
+        ninjaSpawnChance = 4
+    darkWarriorSpawnChance = constants.darkWarrior.spawnPercent
+    if level < 12:
+        darkWarriorSpawnChance = 0
+    elif 12 <= level <= 30:
+        darkWarriorSpawnChance = int(((1/5) * level) ** 2)
+    elif level > 30:
+        darkWarriorSpawnChance = 20
+    for cord in mapGenerator.prevPoints:
+        if pointCap - 5 < currentPoints < pointCap + 5:
+            break
+        # Spawn number allows each enemy to have a chance to be spawned at the same time
+        spawnNumber = random.randint(0, 101)
+        if not adjacent:
+            # spawns skeleton with a 10% chance per tile
+            if spawnNumber <= skeletonSpawnChance:
+                adjacent = True
+                # sets adjacent to True so enemies cannot spawn next to directly next to each other
+                # (technically can since only works for one tile)
+                gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
+                # adds enemy to object list (will be drawn in gameDraw())
+                currentPoints += constants.skeleton.pointValue
+                continue
+            # Checks to spawn squirrel
+            elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
+                adjacent = True
+                gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
+                currentPoints += constants.squirrel.pointValue
+                continue
+            # Checks to spawn ninja
+            elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                adjacent = True
+                gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
+                currentPoints += constants.ninja.pointValue
+                continue
+            # Checks to spawn dark warrior
+            elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                adjacent = True
+                gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
+                currentPoints += constants.darkWarrior.pointValue
+                continue
+        if adjacent:
+            adjacent = False
+            # figure out leveling sometime (enemies depend on level)
 
 
 def gameInitialize():
     fadeIn()
     global mainDisplay, gameMap, player, gameObjects
-    gameMap, mainStartRow = mapGenerator.main() # returns map and mainStartRow (initial path start row)
+    gameMap, mainStartRow = mapGenerator.main()  # returns map and mainStartRow (initial path start row)
     gameObjects = []
     if newGame:
         player = selectPlayer(mainStartRow)
@@ -592,25 +674,9 @@ def gameInitialize():
     except NameError:
         player = selectPlayer(mainStartRow)
     gameObjects.append(player)
-    # Everytime the player passes through a section, the player ventures further into the forest
+    # Every time the player passes through a section, the player ventures further into the forest
     player.forestPos += 1
-    # starts the player at (mainStartRow, 0)
-    # TODO: refactor spawning
-    adjacent = False
-    for cord in mapGenerator.prevPoints[5:]:
-        # spawns skeleton with a 10% chance per tile
-        if not adjacent:
-            if random.randint(0, 101) <= 10:
-                adjacent = True
-                # sets adjacent to True so enemies cannot spawn next to directly next to each other
-                # (technically can since only works for one tile)
-                gameObjects.append(Creatures(cord[0], cord[1], "Skeleton", constants.skeletonBox, 'enemy', 2, 2, 5, 8, 0, 100, 1, 10))
-                # adds enemy to object list (will be drawn in gameDraw())
-                continue
-        if adjacent:
-            adjacent = False
-            # TODO spawn other enemies
-            # figure out leveling sometime (enemies depend on level)
+    spawnEnemies()
     gameMain()
 
 

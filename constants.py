@@ -67,6 +67,7 @@ assassinRaw = pygame.image.load('./GameAssets/RawImages/assassin.png')
 reflectionBackgroundColor = (127, 209, 185)
 
 
+# Character class
 class playerCharacters:
     def __init__(self, name, speed, strength, defense, health, imageRaw, imageBox, introText):
         self.name = name
@@ -84,3 +85,22 @@ warrior = playerCharacters("Warrior", 2, 3, 7, 16, warriorRaw, warriorBox, "Birt
 archer = playerCharacters("Archer", 5, 3, 3, 10, archerRaw, archerBox, "Draw back, hold, release; her arrow always strikes true. The archer has trained for years, perfecting her craft. Her skill is unparalleled.")
 assassin = playerCharacters("Assassin", 7, 4, 1, 12, assassinRaw, assassinBox, "To the left, to the right - there is no one. Yet, there is. Cloaked in the shadows, the assassin uses the environment to stay hidden until the time is right to strike.")
 
+
+# Enemy class
+class enemies:
+    def __init__(self, name, speed, strength, defense, health, imageBox, spawnPercent, pointValue, xpGiven):
+        self.name = name
+        self.speed = speed
+        self.strength = strength
+        self.defense = defense
+        self.health = health
+        self.imageBox = imageBox
+        self.spawnPercent = spawnPercent
+        self.pointValue = pointValue
+        self.xpGiven = xpGiven
+
+
+skeleton = enemies("Skeleton", 3, 2, 1, 7, skeletonBox, 10, 5, 10)
+squirrel = enemies("Squirrel", 5, 3, 2, 12, squirrelBox, 5, 10, 20)
+ninja = enemies("Ninja", 5, 5, 2, 11, ninjaBox, 4, 12, 25)
+darkWarrior = enemies("Dark Warrior", 2, 7, 5, 15, darkWarriorBox, 3, 15, 30)
