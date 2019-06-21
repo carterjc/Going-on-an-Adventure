@@ -5,6 +5,7 @@ import time
 import constants
 import mapGenerator
 
+pygame.mixer.pre_init(44100, 16, 2, 4096)
 target = 'None'
 pygame.init()
 mainDisplay = pygame.display.set_mode((constants.mapColumns * constants.cellWidth, constants.mapRows * constants.cellHeight))
@@ -194,23 +195,23 @@ class Creatures(ObjActor):
         self.health = self.maxhealth
 
     def upgradeSpeed(self):
-        print("You have upgraded your speed by one!")
         self.speed += 1
+        print("You have upgraded your speed by one! You now have a speed of " + str(player.speed) + "!")
         upgradeScreen(False)
 
     def upgradeStrength(self):
-        print("You have upgraded your strength by one!")
         self.strength += 1
+        print("You have upgraded your strength by one! You now have a strength of " + str(player.strength) + "!")
         upgradeScreen(False)
 
     def upgradeDefense(self):
-        print("You have upgraded your defense by one!")
         self.defense += 1
+        print("You have upgraded your defense by one! You now have a defense of " + str(player.defense) + "!")
         upgradeScreen(False)
 
     def upgradeHealth(self):
-        print("You have upgraded your health by three!")
         self.maxhealth += 3
+        print("You have upgraded your health by three! You now have " + str(player.maxhealth) + " health!")
         upgradeScreen(False)
 
 
@@ -412,6 +413,55 @@ def button(text, font, textSize, textColor, xpos, ypos, width, height, colorL, c
     mainDisplay.blit(textSurf, textRect)
 
 
+class optionsTextBox():
+    def __init__(self, keyName, xpos, ypos, width, height, text=""):
+        self.keyName = keyName
+        self.rect = pygame.Rect(xpos, ypos, width, height)
+        self.color = constants.inactiveColor
+        self.text = text
+        self.text_surface = constants.optionFont.render(text, True, constants.activeColor)
+        self.active = False
+
+    def handleEvents(self, event):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Checks to see if the user clicked on the text box
+                if self.rect.collidepoint(event.pos):
+                    self.active = not self.active
+                else:
+                    self.active = False
+                self.color = constants.activeColor if self.active else constants.inactiveColor
+            if event.type == pygame.KEYDOWN:
+                # If the text box is active
+                if self.active:
+                    if event.key == pygame.K_RETURN:
+                        self.active = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.text = ""
+                    else:
+                        self.text = pygame.key.name(event.key).capitalize()
+                        if self.text == "Left" or self.text == "Right" or self.text == "Up" or self.text == "Down":
+                            self.text += " Arrow"
+                    # Renders the new text
+                    self.text_surface = constants.optionFont.render(self.text, True, self.color)
+
+    def update(self):
+        # Resize the box if the text is too long
+        width = max(self.text_surface.get_width(), self.text_surface.get_width()+10)
+        self.rect.width = width
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.text_surface, (self.rect.x+5, self.rect.y+5))
+        # Blit the rect.
+        pygame.draw.rect(screen, self.color, self.rect, 2)
+
+    def save(self):
+        if len(self.text) == 1:
+            setattr(constants, self.keyName + "Key", (self.text, "K_" + self.text.lower()))
+        else:
+            setattr(constants, self.keyName + "Key", (self.text, "K_" + self.text.upper()))
+
+
 def about():
     # About refers to about page being open
     about = True
@@ -429,9 +479,62 @@ def about():
     exit()
 
 
+def saveOptions():
+    for box in inputBoxes:
+        box.save()
+    print("Options saved!")
+    time.sleep(.3)
+
+
+def options():
+    global inputBoxes
+    options = True
+    # Generates first textbox 50 pixels down from the title
+    width = 50
+    height = 32
+    textBoxSpacing = (constants.displaySize[1]*.1) + height
+    firstYPos = (constants.displaySize[1]*.05 + getTextDimension("height", "Options", "Calibri-bold", 60)) + 50
+    attackBox = optionsTextBox("attack", constants.displaySize[0]*.25, firstYPos, width, height, constants.attackKey[0])
+    leftBox = optionsTextBox("left", constants.displaySize[0]*.25, firstYPos + textBoxSpacing, width, height, constants.leftKey[0])
+    rightBox = optionsTextBox("right", constants.displaySize[0]*.25, firstYPos + textBoxSpacing + textBoxSpacing, width, height, constants.rightKey[0])
+    downBox = optionsTextBox("down", constants.displaySize[0]*.75, firstYPos, width, height, constants.downKey[0])
+    upBox = optionsTextBox("up", constants.displaySize[0]*.75, firstYPos + textBoxSpacing, width, height, constants.upKey[0])
+    inputBoxes = [attackBox, leftBox, rightBox, downBox, upBox]
+    while options:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                options = False
+            for box in inputBoxes:
+                box.handleEvents(event)
+        for box in inputBoxes:
+            box.update()
+        mainDisplay.fill((242, 239, 199))
+        for box in inputBoxes:
+            box.draw(mainDisplay)
+        displayText("Options", "Calibri-bold", 60, (constants.displaySize[0] - getTextDimension("width", "Options", "Calibri-bold", 60))/2, constants.displaySize[1]*.05, (0, 0, 0), constants.displaySize[0])
+        # Text for attack textbox
+        displayText("Attack Key:", "Calibri", 24, constants.displaySize[0]*.025, firstYPos + (32 - getTextDimension("height", "Attack Key:", "Calibri", 24))/2, (0, 0, 0), constants.displaySize[0]*.25)
+        # Text for the left textbox
+        displayText("Move Left Key:", "Calibri", 24, constants.displaySize[0]*.025, firstYPos + textBoxSpacing + (32 - getTextDimension("height", "Move Left Key:", "Calibri", 24))/2, (0, 0, 0), constants.displaySize[0]*.25)
+        # Text for the right textbox
+        displayText("Move Right Key:", "Calibri", 24, constants.displaySize[0]*.025, firstYPos + textBoxSpacing + textBoxSpacing + (32 - getTextDimension("height", "Move Right Key:", "Calibri", 24))/2, (0, 0, 0), constants.displaySize[0]*.25)
+        # Text for down textbox
+        displayText("Move Down Key:", "Calibri", 24, constants.displaySize[0] * .525, firstYPos + (32 - getTextDimension("height", "Move Down Key:", "Calibri", 24)) / 2, (0, 0, 0), constants.displaySize[0])
+        # Text for up textbox
+        displayText("Move Up Key:", "Calibri", 24, constants.displaySize[0] * .525, firstYPos + textBoxSpacing + (32 - getTextDimension("height", "Move Up Key:", "Calibri", 24)) / 2, (0, 0, 0), constants.displaySize[0])
+        # Inits home button
+        button("Home", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.7 - constants.menuButtonWidth, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, mainMenu)
+        # Inits save button
+        button("Save", constants.menuButtonFont, 25, (0, 0, 0), constants.displaySize[0]*.3, constants.displaySize[1]*.8, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, saveOptions)
+        pygame.display.flip()
+    pygame.exit()
+    exit()
+
+
 def mainMenu():
     time.sleep(.2)
     mainMenuOpen = True
+    buttonSpacing = constants.displaySize[1] * .052
     while mainMenuOpen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -441,10 +544,15 @@ def mainMenu():
         # Displays background image
         mainDisplay.blit(backgroundImage, (0, 0))
         # Creates four buttons, all with different text, functions, and y positions
-        button("Start", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 175, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, chooseCharacter)
-        button("Resume", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 250, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
-        button("Options", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 325, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
-        button("About", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, 400, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, about)
+        # Gets ypos of title + its height
+        buttonYPos = (constants.displaySize[1]*.10 + getTextDimension("height", "Going on an Adventure", constants.menuButtonFont, 70)) + 25
+        button("Start", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, buttonYPos, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, chooseCharacter)
+        buttonYPos = buttonYPos + constants.menuButtonHeight + buttonSpacing
+        button("Resume", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, buttonYPos, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark)
+        buttonYPos = buttonYPos + constants.menuButtonHeight + buttonSpacing
+        button("Options", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, buttonYPos, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, options)
+        buttonYPos = buttonYPos + constants.menuButtonHeight + buttonSpacing
+        button("About", constants.menuButtonFont, constants.menuButtonFontSize, (0, 0, 0), (constants.displaySize[0]-constants.menuButtonWidth)/2, buttonYPos, constants.menuButtonWidth, constants.menuButtonHeight, constants.menuButtonColorLight, constants.menuButtonColorDark, about)
         # Creates title
         displayText("Going on an Adventure", "Garamond", 70, (constants.displaySize[0] - getTextDimension("width", "Going on an Adventure", constants.menuButtonFont, 70))/2, constants.displaySize[1]*.10, (255, 255, 255), constants.displaySize[0])
         # Updates the display
@@ -561,19 +669,19 @@ def handleKeys():
             # quit attribute - someone closed window
             return "quit"
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == getattr(pygame, constants.upKey[1]):
                 player.move(-1, 0)
                 return "player-moved"
-            if event.key == pygame.K_DOWN:
+            if event.key == getattr(pygame, constants.downKey[1]):
                 player.move(1, 0)
                 return "player-moved"
-            if event.key == pygame.K_RIGHT:
+            if event.key == getattr(pygame, constants.rightKey[1]):
                 player.move(0, 1)
                 return "player-moved"
-            if event.key == pygame.K_LEFT:
+            if event.key == getattr(pygame, constants.leftKey[1]):
                 player.move(0, -1)
                 return "player-moved"
-            if event.key == pygame.K_a:
+            if event.key == getattr(pygame, constants.attackKey[1]):
                 player.attack(player.strength)
                 return "player-attacked"
     return "no-action"
@@ -631,41 +739,42 @@ def spawnEnemies():
     elif level > 30:
         darkWarriorSpawnChance = 20
     for cord in mapGenerator.prevPoints:
-        if pointCap - 5 < currentPoints < pointCap + 5:
-            break
-        # Spawn number allows each enemy to have a chance to be spawned at the same time
-        spawnNumber = random.randint(0, 101)
-        if not adjacent:
-            # spawns skeleton with a 10% chance per tile
-            if spawnNumber <= skeletonSpawnChance:
-                adjacent = True
-                # sets adjacent to True so enemies cannot spawn next to directly next to each other
-                # (technically can since only works for one tile)
-                gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
-                # adds enemy to object list (will be drawn in gameDraw())
-                currentPoints += constants.skeleton.pointValue
-                continue
-            # Checks to spawn squirrel
-            elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
-                adjacent = True
-                gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
-                currentPoints += constants.squirrel.pointValue
-                continue
-            # Checks to spawn ninja
-            elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
-                adjacent = True
-                gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
-                currentPoints += constants.ninja.pointValue
-                continue
-            # Checks to spawn dark warrior
-            elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
-                adjacent = True
-                gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
-                currentPoints += constants.darkWarrior.pointValue
-                continue
-        if adjacent:
-            adjacent = False
-            # figure out leveling sometime (enemies depend on level)
+        if not cord[1] == 0:
+            if pointCap - 5 < currentPoints < pointCap + 5:
+                break
+            # Spawn number allows each enemy to have a chance to be spawned at the same time
+            spawnNumber = random.randint(0, 101)
+            if not adjacent:
+                # spawns skeleton with a 10% chance per tile
+                if spawnNumber <= skeletonSpawnChance:
+                    adjacent = True
+                    # sets adjacent to True so enemies cannot spawn next to directly next to each other
+                    # (technically can since only works for one tile)
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
+                    # adds enemy to object list (will be drawn in gameDraw())
+                    currentPoints += constants.skeleton.pointValue
+                    continue
+                # Checks to spawn squirrel
+                elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
+                    adjacent = True
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
+                    currentPoints += constants.squirrel.pointValue
+                    continue
+                # Checks to spawn ninja
+                elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                    adjacent = True
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
+                    currentPoints += constants.ninja.pointValue
+                    continue
+                # Checks to spawn dark warrior
+                elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                    adjacent = True
+                    gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
+                    currentPoints += constants.darkWarrior.pointValue
+                    continue
+            if adjacent:
+                adjacent = False
+                # figure out leveling sometime (enemies depend on level)
 
 
 def gameInitialize():
@@ -688,4 +797,7 @@ def gameInitialize():
 
 
 if __name__ == '__main__':
+    # pygame.mixer.music.load(constants.backgroundMusic)
+    # pygame.mixer.music.set_volume(.1)
+    # pygame.mixer.music.play(-1)
     mainMenu()

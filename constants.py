@@ -12,6 +12,20 @@ maxMessages = 4
 mapRows = 15
 mapColumns = 25
 
+# Key values
+attackKey = ("A Key", "K_a")
+leftKey = ("Left Arrow", "K_LEFT")
+rightKey = ("Right Arrow", "K_RIGHT")
+downKey = ("Down Arrow", "K_DOWN")
+upKey = ("Up Arrow", "K_UP")
+
+# Base key values
+baseAttackKey = ("A Key", "K_a")
+baseLeftKey = ("Left Arrow", "K_LEFT")
+baseRightKey = ("Right Arrow", "K_RIGHT")
+baseDownKey = ("Down Arrow", "K_DOWN")
+baseUpKey = ("Up Arrow", "K_UP")
+
 # Sprites
 spriteWidth = 32
 gameIcon = pygame.image.load('./GameAssets/TileFit/wizardBox.png')
@@ -40,6 +54,8 @@ darkWarriorBox = pygame.image.load('./GameAssets/TileFit/darkwarriorBox.png')
 # Colors
 defaultColor = (100, 100, 100)
 
+# Music
+backgroundMusic = './GameAssets/Music/backgroundMusic.mp3'
 
 # Main Menu
 displaySize = (mapColumns * cellWidth, mapRows * cellHeight)
@@ -51,8 +67,14 @@ menuButtonColorDark = (179, 223, 255)
 menuButtonFont = "Calibri"
 menuButtonFontSize = 30
 
+# Options Menu
+activeColor = (0, 0, 0)
+inactiveColor = (255, 255, 255)
+optionFont = pygame.font.SysFont("None", 32)
+
+
 # About Page
-aboutText = "This project was originally going to be a small game for our AP CSP class. However, our ambition grew and the project followed" \
+aboutText = "This project was originally going to be a small game for our AP CSP class. However, our ambition grew and the project followed. " \
             "The two developers working on this project are Carter and Jake. Carter headed most of the development while Jake focused on " \
             "miscellaneous tasks. Both were huge helps. They collaborate in and out of school which allowed the game to reach the full potential." \
             "While the game does not include any original artwork (the timeframe did not allow anything), the pieces were selected with care and" \
