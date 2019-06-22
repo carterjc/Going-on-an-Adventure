@@ -4,6 +4,7 @@ import colorsys
 import time
 import constants
 import mapGenerator
+import pickle
 
 pygame.mixer.pre_init(44100, 16, 2, 4096)
 target = 'None'
@@ -412,7 +413,7 @@ def button(text, font, textSize, textColor, xpos, ypos, width, height, colorL, c
     textRect = textRect.move((xpos + ((width-textRect.width)/2)), (ypos + (height-textRect.height)/2))
     mainDisplay.blit(textSurf, textRect)
 
-
+# From https://stackoverflow.com/questions/46390231/how-to-create-a-text-input-box-with-pygame
 class optionsTextBox():
     def __init__(self, keyName, xpos, ypos, width, height, text=""):
         self.keyName = keyName
@@ -603,6 +604,13 @@ def characterReflection():
     exit()
 
 
+# def resumeGame():
+#     global gameObjects
+#
+#     with open('./GameAssets/Data/saveGame', 'rb') as file:
+#         gameObjects = pickle.load(file)
+
+
 def endLevel():
     global newGame
     newGame = False
@@ -659,6 +667,11 @@ def gameMain():
         pygame.display.flip()
     pygame.quit()
     exit()
+
+
+# def saveGame():
+#     with open('data/saveGame', 'wb') as file:
+#         pickle.dump([gameObjects], file)
 
 
 def handleKeys():
@@ -797,7 +810,7 @@ def gameInitialize():
 
 
 if __name__ == '__main__':
-    # pygame.mixer.music.load(constants.backgroundMusic)
-    # pygame.mixer.music.set_volume(.1)
-    # pygame.mixer.music.play(-1)
+    pygame.mixer.music.load(constants.backgroundMusic)
+    pygame.mixer.music.set_volume(.1)
+    pygame.mixer.music.play(-1)
     mainMenu()
