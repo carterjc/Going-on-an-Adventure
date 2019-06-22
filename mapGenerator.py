@@ -119,6 +119,7 @@ def largerPath():
 
 
 def plotTrees():
+    global grassTiles
     # Spawn trees for forest feel
     treePos = {}
     dictKey = 0
@@ -138,7 +139,7 @@ def plotTrees():
             for point in range(0, len(prevPoints)):
                 if prevPoints[point][1] == grassTiles[coord][1]:
                     # Checks if the end ypos of the tree is in between any of the tile ypos on the same column
-                    if (prevPoints[point][0] * constants.cellHeight) <= ((grassTiles[coord][0] * constants.cellHeight) + 60) <= ((prevPoints[point][0] * constants.cellHeight)+ constants.cellHeight):
+                    if (prevPoints[point][0] * constants.cellHeight) <= ((grassTiles[coord][0] * constants.cellHeight) + 60) <= ((prevPoints[point][0] * constants.cellHeight) + constants.cellHeight):
                         treeFits = False
                         break
             if treeFits:
@@ -146,6 +147,27 @@ def plotTrees():
                 treePos[dictKey] = grassTiles[coord][0], grassTiles[coord][1], treeNum
                 dictKey += 1
     return treePos
+
+
+def initAnimals():
+    global grassTiles
+    animalPos = {}
+    dictKey = 0
+    for coord in range(0, len(grassTiles)):
+        # If there is a tree
+        if random.randint(0, 10) == 0:
+            animalFits = True
+            for point in range(0, len(prevPoints)):
+                if prevPoints[point][1] == grassTiles[coord][1]:
+                    # Checks if the end ypos of the tree is in between any of the tile ypos on the same column
+                    if (prevPoints[point][0] * constants.cellHeight) <= ((grassTiles[coord][0] * constants.cellHeight) + 60) <= ((prevPoints[point][0] * constants.cellHeight) + constants.cellHeight):
+                        animalFits = False
+                        break
+            if animalFits:
+                animalNum = random.randint(1, 4)
+                animalPos[dictKey] = grassTiles[coord][0], grassTiles[coord][1], animalNum
+                dictKey += 1
+    return animalPos
 
 
 def main():
@@ -161,4 +183,5 @@ def main():
     # while current column is less than the max column
     addPaths()
     treePos = plotTrees()
-    return myMap, mainStartRow, treePos
+    animalPos = initAnimals()
+    return myMap, mainStartRow, treePos, animalPos

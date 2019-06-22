@@ -5,6 +5,7 @@ import time
 import constants
 import mapGenerator
 import pickle
+from threading import Timer
 
 pygame.mixer.pre_init(44100, 16, 2, 4096)
 target = 'None'
@@ -413,6 +414,7 @@ def button(text, font, textSize, textColor, xpos, ypos, width, height, colorL, c
     textRect = textRect.move((xpos + ((width-textRect.width)/2)), (ypos + (height-textRect.height)/2))
     mainDisplay.blit(textSurf, textRect)
 
+
 # From https://stackoverflow.com/questions/46390231/how-to-create-a-text-input-box-with-pygame
 class optionsTextBox():
     def __init__(self, keyName, xpos, ypos, width, height, text=""):
@@ -616,11 +618,84 @@ def endLevel():
     newGame = False
     if player.column == constants.mapColumns-1:
         endLevel = True
+        # rt.stop()
         fadeIn()
         characterReflection()
     #     Call new screen that showcases XP, etc
     else:
         return
+
+
+# From https://stackoverflow.com/questions/474528/what-is-the-best-way-to-repeatedly-execute-a-function-every-x-seconds-in-python
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer     = None
+        self.interval   = interval
+        self.function   = function
+        self.args       = args
+        self.kwargs     = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+
+def checkAnimalFit(value):
+    animalFits = True
+    for point in range(0, len(mapGenerator.prevPoints)):
+        if mapGenerator.prevPoints[point][1] == value[1]:
+            # Checks if the end ypos of the tree is in between any of the tile ypos on the same column
+            if (mapGenerator.prevPoints[point][0] * constants.cellHeight) <= (
+                    (value[0] * constants.cellHeight) + 60) <= (
+                    (mapGenerator.prevPoints[point][0] * constants.cellHeight) + constants.cellHeight):
+                animalFits = False
+                break
+    return animalFits
+
+
+def moveAnimals():
+    for key, value, in animalPos.items():
+        if random.randint(0, 100) <= 1:
+            row, column, animalNum = value
+            direction = random.randint(0, 3)
+            if direction == 0:
+                # Go down
+                if row+1 <= constants.mapRows-1 and checkAnimalFit(value):
+                    row += 1
+            elif direction == 1:
+                # Go up
+                if row - 1 >= 0 and checkAnimalFit(value):
+                    row -= 1
+            elif direction == 2:
+                # Go right
+                if column + 1 <= constants.mapColumns - 1 and checkAnimalFit(value):
+                    column += 1
+            else:
+                # Go left
+                if column - 1 >= 0 and checkAnimalFit(value):
+                    column -= 1
+            animalPos[key] = row, column, animalNum
+
+
+def drawAnimals():
+    # moveAnimals()
+    for key, value in animalPos.items():
+        row, column, animalNum = value
+        # mainDisplay.blit(getattr(constants, "tree" + str(animalNum)), (column * constants.cellWidth, row * constants.cellHeight))
+        mainDisplay.blit(getattr(constants, "animal" + str(animalNum)), (column * constants.cellWidth, row * constants.cellHeight))
 
 
 def spawnTrees():
@@ -643,6 +718,7 @@ def drawGame():
     # clear the surface
     mainDisplay.fill(constants.defaultColor)
     initMap(gameMap)
+    drawAnimals()
     spawnTrees()
     # draw all objects
     for object in gameObjects:
@@ -654,6 +730,8 @@ def drawGame():
 
 
 def gameMain():
+    # global rt
+    # rt = RepeatedTimer(3, drawAnimals)
     gameQuit = False
     while not gameQuit:
         playerAction = handleKeys()
@@ -665,6 +743,7 @@ def gameMain():
         darkenScreen()
         # update the display
         pygame.display.flip()
+    # rt.stop()
     pygame.quit()
     exit()
 
@@ -718,7 +797,7 @@ def selectPlayer(mainStartRow):
 def spawnEnemies():
     adjacent = False
     # point cap = 1/2 of path tiles
-    pointCap = len(mapGenerator.prevPoints)/2
+    pointCap = int(len(mapGenerator.prevPoints)/2)
     currentPoints = 0
     level = player.forestPos
     skeletonSpawnChance = constants.skeleton.spawnPercent
@@ -751,54 +830,54 @@ def spawnEnemies():
         darkWarriorSpawnChance = int(((1/5) * level) ** 2)
     elif level > 30:
         darkWarriorSpawnChance = 20
-    for cord in mapGenerator.prevPoints:
-        if not cord[1] == 0:
-            if pointCap - 5 < currentPoints < pointCap + 5:
-                break
-            # Spawn number allows each enemy to have a chance to be spawned at the same time
-            spawnNumber = random.randint(0, 101)
-            if not adjacent:
-                # spawns skeleton with a 10% chance per tile
-                if spawnNumber <= skeletonSpawnChance:
-                    adjacent = True
-                    # sets adjacent to True so enemies cannot spawn next to directly next to each other
-                    # (technically can since only works for one tile)
-                    gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
-                    # adds enemy to object list (will be drawn in gameDraw())
-                    currentPoints += constants.skeleton.pointValue
-                    continue
-                # Checks to spawn squirrel
-                elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
-                    adjacent = True
-                    gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
-                    currentPoints += constants.squirrel.pointValue
-                    continue
-                # Checks to spawn ninja
-                elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
-                    adjacent = True
-                    gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
-                    currentPoints += constants.ninja.pointValue
-                    continue
-                # Checks to spawn dark warrior
-                elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
-                    adjacent = True
-                    gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
-                    currentPoints += constants.darkWarrior.pointValue
-                    continue
-            if adjacent:
-                adjacent = False
-                # figure out leveling sometime (enemies depend on level)
+    while not (pointCap - 5 < currentPoints < pointCap + 15):
+        for cord in mapGenerator.prevPoints:
+            if not cord[1] == 0:
+                if pointCap - 5 < currentPoints < pointCap + 5:
+                    return
+                # Spawn number allows each enemy to have a chance to be spawned at the same time
+                spawnNumber = random.randint(0, 101)
+                if not adjacent:
+                    # spawns skeleton with a 10% chance per tile
+                    if spawnNumber <= skeletonSpawnChance:
+                        adjacent = True
+                        # sets adjacent to True so enemies cannot spawn next to directly next to each other
+                        # (technically can since only works for one tile)
+                        gameObjects.append(Creatures(cord[0], cord[1], constants.skeleton.name, constants.skeletonBox, 'enemy', constants.skeleton.speed, constants.skeleton.strength, constants.skeleton.defense, constants.skeleton.health, XPGiven=constants.skeleton.xpGiven))
+                        # adds enemy to object list (will be drawn in gameDraw())
+                        currentPoints += constants.skeleton.pointValue
+                        continue
+                    # Checks to spawn squirrel
+                    elif skeletonSpawnChance < spawnNumber <= squirrelSpawnChance + skeletonSpawnChance:
+                        adjacent = True
+                        gameObjects.append(Creatures(cord[0], cord[1], constants.squirrel.name, constants.squirrelBox, 'enemy', constants.squirrel.speed, constants.squirrel.strength, constants.squirrel.defense, constants.squirrel.health, XPGiven=constants.squirrel.xpGiven))
+                        currentPoints += constants.squirrel.pointValue
+                        continue
+                    # Checks to spawn ninja
+                    elif squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                        adjacent = True
+                        gameObjects.append(Creatures(cord[0], cord[1], constants.ninja.name, constants.ninjaBox, 'enemy', constants.ninja.speed, constants.ninja.strength, constants.ninja.defense, constants.ninja.health, XPGiven=constants.ninja.xpGiven))
+                        currentPoints += constants.ninja.pointValue
+                        continue
+                    # Checks to spawn dark warrior
+                    elif ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance < spawnNumber <= darkWarriorSpawnChance + ninjaSpawnChance + squirrelSpawnChance + skeletonSpawnChance:
+                        adjacent = True
+                        gameObjects.append(Creatures(cord[0], cord[1], constants.darkWarrior.name, constants.darkWarriorBox, 'enemy', constants.darkWarrior.speed, constants.darkWarrior.strength, constants.darkWarrior.defense, constants.darkWarrior.health, XPGiven=constants.darkWarrior.xpGiven))
+                        currentPoints += constants.darkWarrior.pointValue
+                        continue
+                if adjacent:
+                    adjacent = False
+                    # figure out leveling sometime (enemies depend on level)
 
 
 def gameInitialize():
     fadeIn()
-    global mainDisplay, gameMap, player, gameObjects, treePos
-    gameMap, mainStartRow, treePos = mapGenerator.main()  # returns map and mainStartRow (initial path start row)
+    global mainDisplay, gameMap, player, gameObjects, treePos, animalPos
+    gameMap, mainStartRow, treePos, animalPos = mapGenerator.main()  # returns map and mainStartRow (initial path start row)
     gameObjects = []
     if newGame:
         player = selectPlayer(mainStartRow)
     try:
-        player
         player.levelReset(mainStartRow)
     except NameError:
         player = selectPlayer(mainStartRow)

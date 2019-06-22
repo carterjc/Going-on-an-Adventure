@@ -9,8 +9,8 @@ cellHeight = 32
 maxMessages = 4
 
 # Map variables
-mapRows = 15
-mapColumns = 25
+mapRows = 30
+mapColumns = 50
 
 # Key values
 attackKey = ("A Key", "K_a")
@@ -50,6 +50,12 @@ ninjaBox = pygame.image.load('./GameAssets/TileFit/ninjaBox.png')
 dragonPassiveBox = pygame.image.load('./GameAssets/TileFit/dragonPassiveBox.png')
 dragonAggressiveBox = pygame.image.load('./GameAssets/TileFit/dragonAggressiveBox.png')
 darkWarriorBox = pygame.image.load('./GameAssets/TileFit/darkwarriorBox.png')
+# Background Animal Sprites
+animal1 = pygame.image.load('./GameAssets/TileFit/rabbitTransBox.png')
+animal2 = pygame.image.load('./GameAssets/TileFit/wolfTransBox.png')
+animal3 = pygame.image.load('./GameAssets/TileFit/squirrelTransBox.png')
+animal4 = pygame.image.load('./GameAssets/TileFit/racoonTransBox.png')
+
 
 # Colors
 defaultColor = (100, 100, 100)
